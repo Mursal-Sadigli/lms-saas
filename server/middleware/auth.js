@@ -52,12 +52,34 @@ const requireAuth = async (req, res, next) => {
 // Yalnız educator-a icazə verən middleware
 const requireEducator = async (req, res, next) => {
   try {
-    // Hər kəsə admin panelindən kurs yaratmaq hüququ verilir (Auto-Promote)
-    await sql`UPDATE users SET role = 'educator' WHERE id = ${req.auth.userId}`
+    const [user] = await sql`SELECT role FROM users WHERE id = ${req.auth.userId}`
+    
+    // Super Adminlər müəllim tərəfə də sərbəst giriş edə bilərlər. 
+    if (user && user.role === 'admin') {
+      return next()
+    }
+
+    if (!user || user.role !== 'educator') {
+       return res.status(403).json({ error: 'Bu əməliyyat yalnız Müəllimlər üçündür!' })
+    }
+    
     next()
   } catch (err) {
     next(err)
   }
 }
 
-module.exports = { requireAuth, requireEducator }
+// Yalnız Super Admin icazəsi
+const requireAdmin = async (req, res, next) => {
+  try {
+    const [user] = await sql`SELECT role FROM users WHERE id = ${req.auth.userId}`
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: 'Bu əməliyyat üçün Super Admin icazəsi tələb olunur!' })
+    }
+    next()
+  } catch (err) {
+    next(err)
+  }
+}
+
+module.exports = { requireAuth, requireEducator, requireAdmin }

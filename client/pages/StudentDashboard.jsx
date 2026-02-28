@@ -112,11 +112,14 @@ export default function StudentDashboard() {
                   <div className="flex-1 min-w-0 flex flex-col justify-center">
                     <h3 className="font-bold text-gray-900 dark:text-white text-sm truncate mb-0.5">{e.title}</h3>
                     <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">{e.educator_name}</p>
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 bg-gray-100 dark:bg-slate-800 rounded-full h-1.5">
-                        <div className="bg-violet-600 h-1.5 rounded-full transition-all" style={{ width: `${e.progress || 0}%` }} />
+                    <div className="w-full mt-2">
+                      <div className="flex justify-between items-center mb-1 text-xs">
+                        <span className="text-gray-500 dark:text-gray-400 font-medium">İrəliləyiş</span>
+                        <span className="text-violet-600 dark:text-violet-400 font-bold">{e.progress || 0}%</span>
                       </div>
-                      <span className="text-xs font-bold text-gray-600 dark:text-gray-400 shrink-0">{e.progress || 0}%</span>
+                      <div className="w-full bg-gray-100 dark:bg-slate-800 rounded-full h-2.5">
+                        <div className="bg-violet-600 h-2.5 rounded-full transition-all duration-500 ease-out" style={{ width: `${e.progress || 0}%` }} />
+                      </div>
                     </div>
                   </div>
                   <Link to={`/learn/${e.course_id}`}

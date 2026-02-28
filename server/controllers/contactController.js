@@ -1,6 +1,5 @@
-const { Resend } = require('resend');
-
-const resend = new Resend(process.env.RESEND_API_KEY || 're_cSKg8rJD_LxkCs1Z3cCGXGjD9WQFSVGxK');
+const { sendEmail } = require('../utils/sendEmail');
+const { sql } = require('../config/db');
 
 const sendMessage = async (req, res) => {
   const { name, email, subject, message } = req.body;
@@ -10,29 +9,31 @@ const sendMessage = async (req, res) => {
   }
 
   try {
-    const { data, error } = await resend.emails.send({
-      from: 'LearnHub <onboarding@resend.dev>',
-      to: ['sadiqli2024@gmail.com'], // Resend qeydiyyat emailiniz
-      reply_to: email,
-      subject: subject ? `LearnHub ${subject}` : `LearnHub Yeni Mesaj: ${name}`,
+    // Adminin tənzimlədiyi e-poçt ünvanını (və ya defolt olaraq admin ünvanını) çək
+    const [settings] = await sql`SELECT contact_email FROM platform_settings WHERE id = 1`;
+    const toEmail = settings?.contact_email || 'sadiqli2024@gmail.com';
+
+    const emailSent = await sendEmail({
+      to: toEmail,
+      subject: subject ? `LearnHub: ${subject}` : `LearnHub Yeni Mesaj: ${name}`,
       html: `
         <h3>Saytdan yeni əlaqə mesajı</h3>
-        <p><strong>Ad:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Göndərən Adı:</strong> ${name}</p>
+        <p><strong>Göndərən Email:</strong> ${email}</p>
+        <hr/>
         <p><strong>Mesaj:</strong></p>
         <p>${message.replace(/\n/g, '<br/>')}</p>
       `
     });
 
-    if (error) {
-       console.error("Resend daxili xəta:", error);
-       return res.status(400).json({ error: error.message });
+    if (!emailSent) {
+       return res.status(400).json({ error: 'SMTP Server Tənzimləməsi tam deyil. Lütfən Super Admin Panelindən (SMTP) bölməsini doldurun.' });
     }
 
-    res.status(200).json({ success: true, data });
+    res.status(200).json({ success: true, message: 'Mesaj uğurla göndərildi' });
   } catch (error) {
-    console.error("Resend xətası:", error);
-    res.status(500).json({ error: 'Mesaj göndərilərkən xəta baş verdi' });
+    console.error("Əlaqə Formu Xətası:", error);
+    res.status(500).json({ error: 'Mesaj göndərilərkən daxili xəta baş verdi' });
   }
 };
 

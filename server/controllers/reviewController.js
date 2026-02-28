@@ -20,6 +20,11 @@ const addReview = async (req, res) => {
   const userId = req.auth.userId
   const { courseId, rating, comment } = req.body
 
+  const [settings] = await sql`SELECT allow_student_reviews FROM platform_settings WHERE id = 1`
+  if (settings && settings.allow_student_reviews === false) {
+    return res.status(403).json({ error: 'Rəy və yorum yazmaq müvəqqəti olaraq administrator tərəfindən dayandırılıb' })
+  }
+
   // Kursa qeydiyyatlıdırmı?
   const [enrolled] = await sql`
     SELECT id FROM enrollments

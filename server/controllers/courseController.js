@@ -102,6 +102,11 @@ const publishCourse = async (req, res) => {
   const { id } = req.params
   const educatorId = req.auth.userId
 
+  const [settings] = await sql`SELECT require_course_approval FROM platform_settings WHERE id = 1`
+  if (settings && settings.require_course_approval === true) {
+    return res.status(403).json({ error: 'Sistem tənzimləmələrinə əsasən, kurs yalnız Super Admin tərəfindən təsdiqlənib yayımlana bilər.' })
+  }
+
   const [course] = await sql`
     UPDATE courses
     SET is_published = true, updated_at = NOW()

@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS users (
   email       TEXT UNIQUE NOT NULL,
   first_name  TEXT,
   last_name   TEXT,
-  role        TEXT NOT NULL DEFAULT 'student' CHECK (role IN ('student', 'educator')),
+  role        TEXT NOT NULL DEFAULT 'student' CHECK (role IN ('student', 'educator', 'admin')),
   image_url   TEXT,
   created_at  TIMESTAMPTZ DEFAULT NOW(),
   updated_at  TIMESTAMPTZ DEFAULT NOW()

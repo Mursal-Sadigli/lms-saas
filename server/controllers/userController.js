@@ -46,6 +46,13 @@ const updateRole = async (req, res) => {
     return res.status(400).json({ error: 'Yanlış rol dəyəri' })
   }
 
+  if (role === 'educator') {
+    const [settings] = await sql`SELECT is_educator_registration_open FROM platform_settings WHERE id = 1`
+    if (settings && settings.is_educator_registration_open === false) {
+      return res.status(403).json({ error: 'Hazırda administrator tərəfindən müəllim qeydiyyatı dayandırılıb.' })
+    }
+  }
+
   const [user] = await sql`
     UPDATE users SET role = ${role}, updated_at = NOW()
     WHERE id = ${userId}

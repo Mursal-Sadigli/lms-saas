@@ -22,25 +22,30 @@ export default function CourseCard({ course }) {
   const { getToken, isSignedIn } = useAuth()
   const navigate = useNavigate()
   const [isWishlisted, setIsWishlisted] = useState(course.isWishlisted || false)
-  const [loading, setLoading] = useState(false)
-
   const handleHeartClick = async (e) => {
     e.preventDefault() // Link keçidinin qarşısını al
     if (!isSignedIn) {
-      toast.error('Seçilmişlərə əlavə etmək üçün daxil olun')
+      toast.error('Seçilmişlərə əlavə etmək üçün daxil olun', { style: { background: '#333', color: '#fff' } })
       navigate('/sign-in')
       return
     }
+    
+    // Təcili reaksiyanı UI-da göstər (Optimistik)
+    const previousState = isWishlisted
+    const newState = !isWishlisted
+    setIsWishlisted(newState)
+    
+    // Anında toast bildirimi ver (Serveri gözləmədən)
+    if (newState) {
+      toast.success('Seçilmişlərə əlavə edildi 💖', { style: { background: '#333', color: '#fff' }, duration: 2000 })
+    }
+
     try {
-      setLoading(true)
       const token = await getToken()
-      const res = await toggleWishlist(token, id)
-      setIsWishlisted(res.isWishlisted)
-      if (res.isWishlisted) toast.success('Seçilmişlərə əlavə edildi 💖', { style: { background: '#333', color: '#fff' } })
+      await toggleWishlist(token, id)
     } catch(err) {
-      toast.error('Xəta baş verdi', { style: { background: '#333', color: '#fff' } })
-    } finally {
-      setLoading(false)
+      setIsWishlisted(previousState) // Xəta olarsa rəngi/statusu geri qaytar
+      toast.error('Gözlənilməz xəta baş verdi', { style: { background: '#333', color: '#fff' } })
     }
   }
 
@@ -60,7 +65,6 @@ export default function CourseCard({ course }) {
           </span>
           <button 
             onClick={handleHeartClick}
-            disabled={loading}
             className="absolute top-3 right-3 z-10 w-9 h-9 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-sm cursor-pointer border-0"
           >
             <Heart 

@@ -1,8 +1,13 @@
 require('dotenv').config()
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 const { sql } = require('../config/db')
 
-// POST /api/payments/checkout — Stripe Checkout Session yarat
+// Stripe obyektini dinamik yolla əldə etmək üçün helper
+const getStripeInstance = async () => {
+  const [settings] = await sql`SELECT stripe_secret_key FROM platform_settings WHERE id = 1`
+  const secretKey = (settings && settings.stripe_secret_key) ? settings.stripe_secret_key : process.env.STRIPE_SECRET_KEY
+  return require('stripe')(secretKey)
+}
+
 const createCheckoutSession = async (req, res) => {
   const { courseId, couponCode } = req.body
   const userId = req.auth.userId
@@ -47,7 +52,8 @@ const createCheckoutSession = async (req, res) => {
     return res.json({ success: true, isFree: true, redirectUrl: `/learn/${courseId}` })
   }
 
-    const clientUrl = process.env.CLIENT_URL || req.headers.origin || 'http://localhost:5173'
+  const clientUrl = process.env.CLIENT_URL || req.headers.origin || 'http://localhost:5173'
+  const stripe = await getStripeInstance()
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -80,6 +86,7 @@ const verifyPayment = async (req, res) => {
   if (!sessionId) return res.status(400).json({ error: 'Session ID lazımdır' })
 
   // Stripe-dan session al
+  const stripe = await getStripeInstance()
   const session = await stripe.checkout.sessions.retrieve(sessionId)
 
   if (session.payment_status !== 'paid') {

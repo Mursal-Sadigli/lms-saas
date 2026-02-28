@@ -90,4 +90,52 @@ export const getWishlist = (token) =>
   authApi(token).get('/users/wishlist').then((r) => r.data.wishlists)
 
 export const toggleWishlist = (token, courseId) =>
-  authApi(token).post('/users/wishlist', { courseId }).then((r) => r.data)
+  authApi(token).post('/users/wishlist', { courseId }).then((r) => r.data)// ====== ADMIN API ======
+export const getAdminStats = async (token) => {
+  const res = await api.get('/admin/stats', { headers: { Authorization: `Bearer ${token}` } })
+  return res.data
+}
+
+export const getAllUsers = async (token) => {
+  const res = await api.get('/admin/users', { headers: { Authorization: `Bearer ${token}` } })
+  return res.data
+}
+
+export const getAllAdminCourses = async (token) => {
+  const res = await api.get('/admin/courses', { headers: { Authorization: `Bearer ${token}` } })
+  return res.data
+}
+
+export const changeUserRole = async (token, userId, role) => {
+  const res = await api.put(`/admin/users/${userId}/role`, { role }, { headers: { Authorization: `Bearer ${token}` } })
+  return res.data
+}
+
+export const adminDeleteCourse = async (token, courseId) => {
+  const res = await api.delete(`/admin/courses/${courseId}`, { headers: { Authorization: `Bearer ${token}` } })
+  return res.data
+}
+
+export const getPlatformSettings = async (token) => {
+  const res = await api.get('/admin/settings', { headers: { Authorization: `Bearer ${token}` } })
+  return res.data
+}
+
+export const updatePlatformSettings = async (token, settings) => {
+  const res = await api.put('/admin/settings', settings, { headers: { Authorization: `Bearer ${token}` } })
+  return res.data
+}
+
+export const approveCourse = async (token, courseId) => {
+  const res = await api.put(`/admin/courses/${courseId}/approve`, {}, { headers: { Authorization: `Bearer ${token}` } })
+  return res.data
+}
+
+export const getPublicSettings = async () => {
+  try {
+    const res = await api.get('/public/settings')
+    return res.data
+  } catch (err) {
+    return null
+  }
+}

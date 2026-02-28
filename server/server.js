@@ -1,5 +1,5 @@
 require('dotenv').config()
-const express = require('express')
+const express = require('express') // server starting
 const cors = require('cors')
 
 const app = express()
@@ -24,6 +24,7 @@ app.use(express.json())
 // ── Routes ──────────────────────────────────
 app.use('/api/courses', require('./routes/courseRoutes'))
 app.use('/api/users', require('./routes/userRoutes'))
+app.use('/api/admin', require('./routes/adminRoutes')) // <-- Admin Paneli API
 app.use('/api/enrollments', require('./routes/enrollmentRoutes'))
 app.use('/api/reviews', require('./routes/reviewRoutes'))
 app.use('/api/payments', require('./routes/paymentRoutes'))
@@ -31,6 +32,7 @@ app.use('/api/learn', require('./routes/learnRoutes'))
 app.use('/api/coupons', require('./routes/couponRoutes'))
 app.use('/api/educator', require('./routes/educatorRoutes'))
 app.use('/api/contact', require('./routes/contactRoutes'))
+app.use('/api/public', require('./routes/publicRoutes'))
 
 // ── Health check ────────────────────────────
 app.get('/api/health', async (req, res) => {
