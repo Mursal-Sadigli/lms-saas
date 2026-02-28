@@ -112,8 +112,8 @@ export default function Home() {
 
   useEffect(() => {
     fetchCourses()
-      .then(data => data?.length ? setCourses(data) : setCourses(mockCourses))
-      .catch(() => setCourses(mockCourses))
+      .then(data => setCourses(data))
+      .catch(() => setCourses([]))
       .finally(() => setCoursesLoading(false))
   }, [])
 

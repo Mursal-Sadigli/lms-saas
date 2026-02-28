@@ -24,10 +24,9 @@ export default function Courses() {
         const data = await fetchCourses(params)
         setCourses(data)
       } catch (err) {
-        // API bağlı deyilsə mock data göstər
-        console.warn('API bağlı deyil, mock data istifadə edilir')
-        setError('Serverlə bağlantı yoxdur. Mock məlumatlar göstərilir.')
-        setCourses(mockCourses)
+        console.warn('API error, empty data')
+        setError('Hələ ki heç bir kurs yoxdur.')
+        setCourses([])
       } finally {
         setLoading(false)
       }
