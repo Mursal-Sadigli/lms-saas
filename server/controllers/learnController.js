@@ -7,11 +7,15 @@ const getLearnData = async (req, res) => {
     const userId = req.auth.userId
 
     // Qeydiyyatlıdırmı?
-    const [enrollment] = await sql`
+    // Qeydiyyatlıdırmı (ya fərdi ya da abunəliklə)?
+    const [user] = await sql`SELECT subscription_status FROM users WHERE id = ${userId}`
+    const hasSubscription = user && user.subscription_status && user.subscription_status !== 'free'
+
+    let [enrollment] = await sql`
       SELECT id, progress FROM enrollments
       WHERE user_id = ${userId} AND course_id = ${courseId}
     `
-    if (!enrollment) {
+    if (!enrollment && !hasSubscription) {
       return res.status(403).json({ error: 'Bu kursa qeydiyyatlı deyilsiniz.' })
     }
 
@@ -45,7 +49,8 @@ const getLearnData = async (req, res) => {
       course,
       videos: videosWithAccess,
       progress,
-      enrollmentId: enrollment.id,
+      progress,
+      enrollmentId: enrollment ? enrollment.id : null,
     })
   } catch (err) {
     console.error('getLearnData xətası:', err)
@@ -64,10 +69,14 @@ const completeVideo = async (req, res) => {
     if (!video) return res.status(404).json({ error: 'Video tapılmadı' })
 
     // Qeydiyyatlıdırmı?
-    const [enrollment] = await sql`
+    // Qeydiyyatlıdırmı?
+    const [user] = await sql`SELECT subscription_status FROM users WHERE id = ${userId}`
+    const hasSubscription = user && user.subscription_status && user.subscription_status !== 'free'
+
+    let [enrollment] = await sql`
       SELECT id FROM enrollments WHERE user_id = ${userId} AND course_id = ${video.course_id}
     `
-    if (!enrollment) return res.status(403).json({ error: 'Bu kursa qeydiyyatlı deyilsiniz.' })
+    if (!enrollment && !hasSubscription) return res.status(403).json({ error: 'Bu kursa qeydiyyatlı deyilsiniz.' })
 
     // Tamamlandı olaraq qeyd et
     await sql`
@@ -87,7 +96,15 @@ const completeVideo = async (req, res) => {
     const progress = Math.round((Number(done) / Number(total)) * 100)
 
     // Enrollment progress yenilə
-    await sql`UPDATE enrollments SET progress = ${progress} WHERE user_id = ${userId} AND course_id = ${video.course_id}`
+    if (enrollment) {
+      await sql`UPDATE enrollments SET progress = ${progress} WHERE user_id = ${userId} AND course_id = ${video.course_id}`
+    } else {
+      // Abunəlik əsasında ilk dəfə video bitirdikdə enrollments rekordunu yaradırıq ki progress-i tutaq
+      await sql`
+        INSERT INTO enrollments (user_id, course_id, payment_id, amount_paid, progress)
+        VALUES (${userId}, ${video.course_id}, 'subscription_access', 0, ${progress})
+      `
+    }
 
     // Növbəti videonu tap
     const [nextVideo] = await sql`

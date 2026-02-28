@@ -71,7 +71,7 @@ export default function CertificateView() {
 
         {/* The Certificate Canvas */}
         <div 
-          className="bg-white border-[12px] border-slate-900 relative p-12 overflow-hidden shadow-2xl print:border-[8px] print:shadow-none"
+          className="bg-white border-12 border-slate-900 relative p-12 overflow-hidden shadow-2xl print:border-8 print:shadow-none"
           style={{ aspectRatio: '1.414 / 1' }} // A4 Landscape ratio
         >
           {/* Decorative Elements */}
