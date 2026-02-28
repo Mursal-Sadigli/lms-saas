@@ -1,8 +1,9 @@
 import { Link, useLocation } from 'react-router-dom'
-import { SignedIn, SignedOut, UserButton } from '@clerk/clerk-react'
-import { BookOpen, Home, Info, Mail, BookMarked, Menu, X, Moon, Sun, Bell } from 'lucide-react'
-import { useState } from 'react'
+import { SignedIn, SignedOut, UserButton, useAuth } from '@clerk/clerk-react'
+import { BookOpen, Home, Info, Mail, BookMarked, Menu, X, Moon, Sun, Bell, Heart } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import { useTheme } from '../src/context/ThemeContext'
+import { getWishlist } from '../src/api'
 import toast from 'react-hot-toast'
 
 const navItems = [
@@ -15,6 +16,29 @@ const navItems = [
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const { theme, toggleTheme } = useTheme()
+  const { getToken, isSignedIn } = useAuth()
+  const [wishlistCount, setWishlistCount] = useState(0)
+
+  useEffect(() => {
+    if (isSignedIn) {
+      getToken()
+        .then(token => getWishlist(token))
+        .then(data => setWishlistCount(data?.length || 0))
+        .catch(() => {})
+    } else {
+      setWishlistCount(0)
+    }
+
+    const handleWishlistUpdate = (e) => {
+      setWishlistCount(prev => {
+        const newCount = e.detail?.added ? prev + 1 : prev - 1
+        return Math.max(0, newCount)
+      })
+    }
+
+    window.addEventListener('wishlistUpdated', handleWishlistUpdate)
+    return () => window.removeEventListener('wishlistUpdated', handleWishlistUpdate)
+  }, [isSignedIn, getToken])
 
   const showNotifications = () => {
     toast('Hələ ki, yeni bildirişiniz yoxdur.', { icon: '🔔' })
@@ -58,6 +82,20 @@ export default function Navbar() {
               <Bell size={18} />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
+            {isSignedIn && (
+              <Link
+                to="/wishlist"
+                className="p-2 rounded-full text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors relative flex items-center justify-center cursor-pointer no-underline border-0 bg-transparent"
+                aria-label="Wishlist"
+              >
+                <Heart size={18} />
+                {wishlistCount > 0 && (
+                  <span className="absolute top-[2px] right-[2px] w-4 h-4 bg-violet-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center border border-white dark:border-slate-900">
+                    {wishlistCount}
+                  </span>
+                )}
+              </Link>
+            )}
           </div>
           <SignedIn>
             <UserButton afterSignOutUrl="/" />
@@ -73,7 +111,21 @@ export default function Navbar() {
         </div>
 
         {/* Mobile toggle */}
-        <div className="flex items-center gap-2 md:hidden">
+        <div className="flex items-center gap-1 sm:gap-2 md:hidden">
+          {isSignedIn && (
+            <Link
+              to="/wishlist"
+              className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-800 transition-colors relative flex items-center justify-center cursor-pointer no-underline border-0 bg-transparent"
+              aria-label="Wishlist"
+            >
+              <Heart size={20} />
+              {wishlistCount > 0 && (
+                <span className="absolute top-[2px] right-[2px] w-4 h-4 bg-violet-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center border border-white dark:border-slate-900">
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
+          )}
           <button 
             onClick={toggleTheme} 
             className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-800 transition-colors cursor-pointer border-0 bg-transparent"

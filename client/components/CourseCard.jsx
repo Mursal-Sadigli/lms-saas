@@ -41,10 +41,15 @@ export default function CourseCard({ course }) {
     }
 
     try {
+      // Optimizasiya: Navbar-a dərhal xəbər veririk ki sayğacı artırsın/azaltsın.
+      window.dispatchEvent(new CustomEvent('wishlistUpdated', { detail: { added: newState } }))
+
       const token = await getToken()
       await toggleWishlist(token, id)
     } catch(err) {
       setIsWishlisted(previousState) // Xəta olarsa rəngi/statusu geri qaytar
+      // Navbar sayını da geri al
+      window.dispatchEvent(new CustomEvent('wishlistUpdated', { detail: { added: previousState } }))
       toast.error('Gözlənilməz xəta baş verdi', { style: { background: '#333', color: '#fff' } })
     }
   }

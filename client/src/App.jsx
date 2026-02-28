@@ -12,11 +12,39 @@ import EducatorDashboard from '../pages/EducatorDashboard'
 import CreateCourse from '../pages/CreateCourse'
 import EditCourse from '../pages/EditCourse'
 import SuperAdminPanel from '../pages/SuperAdminPanel'
+import Wishlist from '../pages/Wishlist'
 import LearnPage from '../pages/LearnPage'
 import PaymentSuccess from '../pages/PaymentSuccess'
 import MaintenancePage from '../pages/MaintenancePage'
 import { Toaster } from 'react-hot-toast'
-import { getPublicSettings } from './api'
+import { getPublicSettings, trackVisitor } from './api'
+
+function RouteTracker() {
+  const location = useLocation()
+  
+  useEffect(() => {
+    const ua = navigator.userAgent
+    let browser = "Digər"
+    if (ua.includes("Firefox")) browser = "Firefox"
+    else if (ua.includes("SamsungBrowser")) browser = "Samsung Internet"
+    else if (ua.includes("Opera") || ua.includes("OPR")) browser = "Opera"
+    else if (ua.includes("Edge") || ua.includes("Edg")) browser = "Edge"
+    else if (ua.includes("Chrome")) browser = "Chrome"
+    else if (ua.includes("Safari")) browser = "Safari"
+    
+    let device = "Desktop"
+    if (/Mobi|Android/i.test(ua)) device = "Mobile"
+    if (/Tablet|iPad/i.test(ua)) device = "Tablet"
+    
+    trackVisitor({
+      device,
+      browser,
+      page_visited: location.pathname
+    }).catch(() => {})
+  }, [location.pathname])
+
+  return null
+}
 
 function App() {
   const location = useLocation()
@@ -61,6 +89,7 @@ function App() {
           className: 'dark:bg-slate-800 dark:text-white border dark:border-slate-700',
         }}
       />
+      <RouteTracker />
       {!hideNavbar && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
@@ -71,6 +100,7 @@ function App() {
         <Route path="/learn/:courseId" element={<LearnPage />} />
         <Route path="/payment/success" element={<PaymentSuccess />} />
         <Route path="/student/dashboard" element={<StudentDashboard />} />
+        <Route path="/wishlist" element={<Wishlist />} />
         {/* Gizli Yeni Super Admin Paneli */}
         <Route path="/ms/admin/123" element={<SuperAdminPanel />} />
 

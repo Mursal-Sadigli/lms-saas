@@ -142,3 +142,17 @@ export const getPublicSettings = async () => {
     return null
   }
 }
+
+export const trackVisitor = async (data) => {
+  try {
+    const res = await api.post('/public/track', data)
+    return res.data
+  } catch (err) {
+    return null
+  }
+}
+
+export const fetchAdminVisitors = async (token) => {
+  const res = await api.get('/admin/visitors', { headers: { Authorization: `Bearer ${token}` } })
+  return res.data
+}

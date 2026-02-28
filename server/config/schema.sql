@@ -102,6 +102,16 @@ CREATE INDEX IF NOT EXISTS idx_videos_course ON course_videos(course_id);
 CREATE INDEX IF NOT EXISTS idx_coupons_code ON coupons(code);
 CREATE INDEX IF NOT EXISTS idx_coupons_educator ON coupons(educator_id);
 
+-- ── 7. VISITORS LOG ───────────────────────
+CREATE TABLE IF NOT EXISTS visitors_log (
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  ip_address          TEXT,
+  device              TEXT,
+  browser             TEXT,
+  page_visited        TEXT,
+  created_at          TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ── TEST DATA (isteğe bağlı, sil əgər lazım deyil) ──
 -- INSERT INTO users (id, email, first_name, role)
 -- VALUES ('test_educator', 'educator@test.az', 'Test', 'educator');

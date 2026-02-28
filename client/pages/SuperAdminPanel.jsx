@@ -19,7 +19,10 @@ import {
   Lock,
   Mail,
   Wallet,
-  CheckCircle
+  CheckCircle,
+  Eye,
+  Menu,
+  X
 } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import toast from 'react-hot-toast'
@@ -31,7 +34,8 @@ import {
   adminDeleteCourse,
   getPlatformSettings,
   updatePlatformSettings,
-  approveCourse
+  approveCourse,
+  fetchAdminVisitors
 } from '../src/api'
 
 export default function SuperAdminPanel() {
@@ -44,11 +48,13 @@ export default function SuperAdminPanel() {
   const [usersList, setUsersList] = useState([])
   const [coursesList, setCoursesList] = useState([])
   const [settings, setSettings] = useState(null)
+  const [visitorsList, setVisitorsList] = useState([])
   
   const [activeTab, setActiveTab] = useState('dashboard')
   const [settingsTab, setSettingsTab] = useState('general')
   const [loading, setLoading] = useState(true)
   const [savingSettings, setSavingSettings] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   // Recharts üçün simulyasiya məlumatları
   const chartData = [
@@ -66,16 +72,18 @@ export default function SuperAdminPanel() {
     const fetchData = async () => {
       try {
         const token = await getToken()
-        const [statsData, usersData, coursesData, settingsData] = await Promise.all([
+        const [statsData, usersData, coursesData, settingsData, visitorsData] = await Promise.all([
           getAdminStats(token),
           getAllUsers(token),
           getAllAdminCourses(token),
-          getPlatformSettings(token)
+          getPlatformSettings(token),
+          fetchAdminVisitors(token)
         ])
         setStats(statsData)
         setUsersList(usersData)
         setCoursesList(coursesData)
         setSettings(settingsData.settings)
+        setVisitorsList(visitorsData)
       } catch (err) {
         toast.error('Giriş qadağandır və ya xəta baş verdi', { style: { background: '#333', color: '#fff' } })
         navigate('/') // Admin deyilsə anında ana səhifəyə qaytar
@@ -162,22 +170,50 @@ export default function SuperAdminPanel() {
     { id: 'dashboard', label: 'İdarə Paneli', icon: LayoutDashboard },
     { id: 'users', label: 'İstifadəçilər', icon: Users },
     { id: 'courses', label: 'Kurslar', icon: BookOpen },
+    { id: 'visitors', label: 'Ziyarətçilər', icon: Eye },
     { id: 'payments', label: 'Maliyyə', icon: CreditCard },
     { id: 'coupons', label: 'Kuponlar', icon: Ticket },
     { id: 'settings', label: 'Tənzimləmələr', icon: Settings },
   ]
 
   return (
-    <div className="flex h-screen bg-slate-50 dark:bg-slate-950 text-gray-900 dark:text-gray-100 overflow-hidden font-sans transition-colors duration-200">
+    <div className="flex flex-col md:flex-row h-screen bg-slate-50 dark:bg-slate-950 text-gray-900 dark:text-gray-100 overflow-hidden font-sans transition-colors duration-200">
       
+      {/* Mobile Header */}
+      <div className="md:hidden bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 p-4 flex items-center justify-between z-20 shrink-0">
+        <div className="flex items-center gap-2">
+          <ShieldAlert className="text-red-500" size={24} />
+          <h1 className="font-extrabold text-lg tracking-tight leading-tight">Super Admin</h1>
+        </div>
+        <button 
+          onClick={() => setIsSidebarOpen(true)} 
+          className="p-2 border-0 bg-gray-100 dark:bg-slate-800 focus:bg-gray-200 text-gray-700 dark:text-gray-300 rounded-lg cursor-pointer transition-colors"
+        >
+          <Menu size={24} />
+        </button>
+      </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)} />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-800 flex flex-col shadow-xs z-10 transition-colors shrink-0">
-        <div className="h-20 flex items-center px-6 border-b border-gray-100 dark:border-slate-800 shrink-0">
-          <ShieldAlert className="text-red-500 mr-2.5" size={24} />
-          <div>
-            <h1 className="font-extrabold text-lg tracking-tight leading-tight">Super Admin</h1>
-            <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">{user?.firstName} {user?.lastName}</p>
+      <aside className={`fixed md:static inset-y-0 left-0 w-72 md:w-64 bg-white dark:bg-slate-900 md:border-r border-gray-200 dark:border-slate-800 flex flex-col shadow-2xl md:shadow-xs z-50 transition-transform duration-300 ease-in-out shrink-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+        <div className="h-20 flex items-center justify-between px-6 border-b border-gray-100 dark:border-slate-800 shrink-0">
+          <div className="flex items-center">
+            <ShieldAlert className="text-red-500 mr-2.5" size={24} />
+            <div>
+              <h1 className="font-extrabold text-lg tracking-tight leading-tight">Super Admin</h1>
+              <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">{user?.firstName} {user?.lastName}</p>
+            </div>
           </div>
+          <button 
+            onClick={() => setIsSidebarOpen(false)} 
+            className="md:hidden p-1.5 border-0 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-500 rounded-lg cursor-pointer transition-colors"
+          >
+            <X size={20} />
+          </button>
         </div>
 
         <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-1">
@@ -188,7 +224,10 @@ export default function SuperAdminPanel() {
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => {
+                  setActiveTab(item.id)
+                  setIsSidebarOpen(false)
+                }}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-all border-0 cursor-pointer ${
                   isActive 
                     ? 'bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-600/20' 
@@ -432,6 +471,62 @@ export default function SuperAdminPanel() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {/* VISITORS TAB */}
+            {activeTab === 'visitors' && (
+              <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 overflow-visible shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div>
+                    <h3 className="text-lg font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+                       <Eye className="text-violet-500" size={20} />
+                       Sayt Ziyarətçiləri
+                    </h3>
+                    <p className="text-sm text-gray-500 mt-1">Sistem yaddaşında qalan son 500 ziyarət sessiyası.</p>
+                  </div>
+                  <div className="bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 shadow-sm">
+                    <Activity size={16} /> Total: {visitorsList.length}
+                  </div>
+                </div>
+                <div className="overflow-x-auto max-h-[60vh]">
+                  <table className="w-full text-left border-collapse min-w-[700px]">
+                    <thead className="sticky top-0 bg-slate-50 dark:bg-slate-950 z-10 shadow-sm shadow-slate-200/50 dark:shadow-slate-900/50">
+                      <tr>
+                        <th className="px-8 py-5 text-xs uppercase text-gray-500 dark:text-gray-400 font-extrabold tracking-widest pl-8">İP Ünvan</th>
+                        <th className="px-8 py-5 text-xs uppercase text-gray-500 dark:text-gray-400 font-extrabold tracking-widest">Cihaz / OS</th>
+                        <th className="px-8 py-5 text-xs uppercase text-gray-500 dark:text-gray-400 font-extrabold tracking-widest">Brauzer</th>
+                        <th className="px-8 py-5 text-xs uppercase text-gray-500 dark:text-gray-400 font-extrabold tracking-widest">Səhifə</th>
+                        <th className="px-8 py-5 text-xs uppercase text-gray-500 dark:text-gray-400 font-extrabold tracking-widest text-right">Tarix</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50 dark:divide-slate-800/50 text-sm">
+                      {visitorsList.length === 0 ? (
+                         <tr>
+                            <td colSpan="5" className="px-8 py-12 text-center text-gray-400 font-medium">Hələ heç bir ziyarətçi izlənilməyib.</td>
+                         </tr>
+                      ) : visitorsList.map(v => (
+                        <tr key={v.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                          <td className="px-8 py-4 font-mono text-xs font-bold text-gray-900 dark:text-white pl-8">
+                             {v.ip_address}
+                          </td>
+                          <td className="px-8 py-4 text-gray-600 dark:text-gray-400 font-medium">
+                             {v.device || 'Naməlum'}
+                          </td>
+                          <td className="px-8 py-4 text-gray-600 dark:text-gray-400 font-medium">
+                             {v.browser || 'Naməlum'}
+                          </td>
+                          <td className="px-8 py-4 max-w-[200px] truncate text-violet-600 dark:text-violet-400 font-medium" title={v.page_visited}>
+                             {v.page_visited}
+                          </td>
+                          <td className="px-8 py-4 text-right text-gray-500 dark:text-gray-500 font-medium text-xs">
+                             {new Date(v.created_at).toLocaleString('az-AZ')}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
 

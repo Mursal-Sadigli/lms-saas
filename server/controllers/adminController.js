@@ -120,6 +120,20 @@ const approveCourse = async (req, res) => {
     res.status(500).json({ error: 'Kurs təsdiqlənərkən xəta baş verdi: ' + err.message })
   }
 }
+// 7. Ziyarətçi Loqları (Super Admin üçün)
+const getVisitorLogs = async (req, res) => {
+  try {
+    const logs = await sql`
+      SELECT id, ip_address, device, browser, page_visited, created_at
+      FROM visitors_log
+      ORDER BY created_at DESC
+      LIMIT 500
+    `
+    res.json(logs)
+  } catch (error) {
+    res.status(500).json({ error: 'Visitor logs fetch xətası: ' + error.message })
+  }
+}
 
 module.exports = {
   getAdminStats,
@@ -127,5 +141,6 @@ module.exports = {
   getAllCourses,
   changeUserRole,
   adminDeleteCourse,
-  approveCourse
+  approveCourse,
+  getVisitorLogs
 }

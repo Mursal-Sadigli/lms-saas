@@ -5,7 +5,8 @@ import {
   Send, Award, BookOpen, Clock, Users, Shield, Zap, Star
 } from 'lucide-react'
 import CourseCard from '../components/CourseCard'
-import { fetchCourses, sendContactMessage } from '../src/api'
+import { fetchCourses, sendContactMessage, getWishlist } from '../src/api'
+import { useAuth } from '@clerk/clerk-react'
 
 export const allCourses = [
   {
@@ -103,6 +104,7 @@ const testimonials = [
 ]
 
 export default function Home() {
+  const { getToken, isSignedIn } = useAuth()
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState('Hamısı')
   const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' })
@@ -111,11 +113,30 @@ export default function Home() {
   const [coursesLoading, setCoursesLoading] = useState(true)
 
   useEffect(() => {
-    fetchCourses()
-      .then(data => setCourses(data))
-      .catch(() => setCourses([]))
-      .finally(() => setCoursesLoading(false))
-  }, [])
+    const loadData = async () => {
+      try {
+        const data = await fetchCourses()
+        let wishlists = []
+        if (isSignedIn) {
+          const token = await getToken()
+          if (token) {
+            wishlists = await getWishlist(token)
+          }
+        }
+        const wIds = wishlists.map(w => w.id)
+        const mapped = data.map(c => ({
+          ...c,
+          isWishlisted: wIds.includes(c.id || c._id)
+        }))
+        setCourses(mapped)
+      } catch (err) {
+        setCourses([])
+      } finally {
+        setCoursesLoading(false)
+      }
+    }
+    loadData()
+  }, [isSignedIn, getToken])
 
   const filtered = courses.filter(c => {
     const matchSearch = c.title.toLowerCase().includes(search.toLowerCase()) ||

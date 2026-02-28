@@ -7,7 +7,8 @@ const {
   getAllCourses,
   changeUserRole,
   adminDeleteCourse,
-  approveCourse // Added approveCourse
+  approveCourse,
+  getVisitorLogs
 } = require('../controllers/adminController')
 
 const {
@@ -24,7 +25,7 @@ router.get('/courses', getAllCourses)
 router.put('/users/:id/role', changeUserRole)
 router.delete('/courses/:id', adminDeleteCourse)
 router.put('/courses/:id/approve', approveCourse) // Added new route
-
+router.get('/visitors', getVisitorLogs)
 // Tənzimləmələr yolları
 router.get('/settings', getSettings)
 router.put('/settings', updateSettings)
