@@ -44,13 +44,20 @@ const getLearnData = async (req, res) => {
     const completedCount = videos.filter(v => v.completed).length
     const progress = videos.length > 0 ? Math.round((completedCount / videos.length) * 100) : 0
 
-    // Əgər istifadəçinin proqresi artıq 100%-dirsə və ya əvvəllər bitiribsə, sertifikatını avtomatik ver.
+    // Əgər istifadəçinin proqresi artıq 100%-dirsə və ya əvvəllər bitiribsə, sertifikatını avtomatik ver/tap.
+    let certificateId = null;
     if (progress === 100 || progress > 99) {
-      await sql`
-        INSERT INTO certificates (user_id, course_id)
-        VALUES (${userId}, ${courseId})
-        ON CONFLICT (user_id, course_id) DO NOTHING
-      `
+      const [cert] = await sql`SELECT id FROM certificates WHERE user_id = ${userId} AND course_id = ${courseId}`
+      if (!cert) {
+        const [newCert] = await sql`
+          INSERT INTO certificates (user_id, course_id)
+          VALUES (${userId}, ${courseId})
+          RETURNING id
+        `
+        if (newCert) certificateId = newCert.id;
+      } else {
+        certificateId = cert.id;
+      }
     }
 
     res.json({
@@ -58,8 +65,8 @@ const getLearnData = async (req, res) => {
       course,
       videos: videosWithAccess,
       progress,
-      progress,
       enrollmentId: enrollment ? enrollment.id : null,
+      certificateId,
     })
   } catch (err) {
     console.error('getLearnData xətası:', err)
@@ -121,16 +128,23 @@ const completeVideo = async (req, res) => {
       WHERE course_id = ${video.course_id} AND position = ${video.position + 1}
     `
 
-    // TAMAMLANMA (100%) ZAMANI SERTİFİKAT VERİLMƏSİ
+    // TAMAMLANMA (100%) ZAMANI SERTİFİKAT VERİLMƏSİ VƏ ID QAYTARILMASI
+    let newCertId = null;
     if (progress === 100 || progress > 99) {
-      await sql`
-        INSERT INTO certificates (user_id, course_id)
-        VALUES (${userId}, ${video.course_id})
-        ON CONFLICT (user_id, course_id) DO NOTHING
-      `
+      const [cert] = await sql`SELECT id FROM certificates WHERE user_id = ${userId} AND course_id = ${video.course_id}`
+      if (!cert) {
+        const [newCert] = await sql`
+          INSERT INTO certificates (user_id, course_id)
+          VALUES (${userId}, ${video.course_id})
+          RETURNING id
+        `
+        if(newCert) newCertId = newCert.id;
+      } else {
+        newCertId = cert.id;
+      }
     }
 
-    res.json({ success: true, progress, nextVideoId: nextVideo?.id || null })
+    res.json({ success: true, progress, nextVideoId: nextVideo?.id || null, newCertId })
   } catch (err) {
     console.error('completeVideo xətası:', err)
     res.status(500).json({ error: 'Server xətası baş verdi' })

@@ -18,6 +18,7 @@ export default function LearnPage() {
   const [activeVideo, setActiveVideo] = useState(null)
   const [completing, setCompleting] = useState(false)
   const [justCompleted, setJustCompleted] = useState(false)
+  const [certificateId, setCertificateId] = useState(null)
   
   // Quiz states
   const [showQuiz, setShowQuiz] = useState(false)
@@ -38,6 +39,7 @@ export default function LearnPage() {
       // İlk kilidsiz tamamlanmamış videonu aç
       const firstUnlocked = d.videos.find(v => v.unlocked && !v.completed) || d.videos.find(v => v.unlocked)
       setActiveVideo(firstUnlocked || d.videos[0])
+      if (d.certificateId) setCertificateId(d.certificateId)
     } catch (err) {
       if (err.response?.status === 403) {
         navigate(`/course/${courseId}`)
@@ -74,7 +76,9 @@ export default function LearnPage() {
       setCompleting(true)
       const token = await getToken()
       const res = await authApi(token).post(`/learn/${activeVideo.id}/complete`)
-      const { progress, nextVideoId } = res.data
+      const { progress, nextVideoId, newCertId } = res.data
+
+      if (newCertId) setCertificateId(newCertId)
 
       // Local state yenilə
       setData(prev => {
@@ -235,12 +239,26 @@ export default function LearnPage() {
 
           {/* Certificate Banner */}
           {progress === 100 && (
-            <div className="bg-linear-to-r from-amber-900/50 to-yellow-900/50 border border-amber-700 mx-4 my-4 rounded-2xl px-5 py-4 flex items-center gap-4">
-              <Award size={40} className="text-amber-400 shrink-0" />
-              <div>
-                <h3 className="text-amber-300 font-extrabold text-base">Kursu tamamladınız! 🎉</h3>
-                <p className="text-amber-400/70 text-xs mt-0.5">Sertifikatınız tezliklə hazır olacaq.</p>
+            <div className="bg-linear-to-r from-amber-900/50 to-yellow-900/50 border border-amber-700 mx-4 my-4 rounded-2xl px-5 py-4 flex flex-col sm:flex-row items-center gap-4 justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-amber-500/20 rounded-full flex items-center justify-center shrink-0">
+                  <Award size={24} className="text-amber-400" />
+                </div>
+                <div>
+                  <h3 className="text-amber-300 font-extrabold text-base">Təbriklər, Kursu Tamamladınız! 🎉</h3>
+                  <p className="text-amber-500/80 text-xs mt-0.5">Sertifikatınız avtomatik olaraq profilinizə əlavə edildi.</p>
+                </div>
               </div>
+              
+              {certificateId ? (
+                <Link to={`/certificate/${certificateId}`} target="_blank" className="shrink-0 bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold px-5 py-2.5 rounded-xl text-sm transition-colors border-0 no-underline whitespace-nowrap">
+                  Sertifikata Bax 🎓
+                </Link>
+              ) : (
+                <button disabled className="shrink-0 bg-amber-800/50 text-amber-500/50 font-bold px-5 py-2.5 rounded-xl text-sm border-0 whitespace-nowrap">
+                  Hazırlanır...
+                </button>
+              )}
             </div>
           )}
         </div>
