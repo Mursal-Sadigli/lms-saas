@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 5000
 
 // ── CORS ────────────────────────────────────
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: true, // İstənilən mənşədən (Vercel və s.) gələn sorğulara icazə ver
   credentials: true,
 }))
 

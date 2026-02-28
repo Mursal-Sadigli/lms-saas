@@ -47,25 +47,27 @@ const createCheckoutSession = async (req, res) => {
     return res.json({ success: true, isFree: true, redirectUrl: `/learn/${courseId}` })
   }
 
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ['card'],
-    mode: 'payment',
-    line_items: [{
-      price_data: {
-        currency: 'usd',
-        product_data: {
-          name: course.title,
-          description: course.description || '',
-          images: course.thumbnail ? [course.thumbnail] : [],
+    const clientUrl = process.env.CLIENT_URL || req.headers.origin || 'http://localhost:5173'
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      line_items: [{
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: course.title,
+            description: course.description || '',
+            images: course.thumbnail ? [course.thumbnail] : [],
+          },
+          unit_amount: Math.round(finalPrice * 100),
         },
-        unit_amount: Math.round(finalPrice * 100),
-      },
-      quantity: 1,
-    }],
-    metadata: { courseId: course.id, userId, couponCode: couponCode || '' },
-    success_url: `${process.env.CLIENT_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}&courseId=${course.id}`,
-    cancel_url: `${process.env.CLIENT_URL}/course/${course.id}?payment=cancelled`,
-  })
+        quantity: 1,
+      }],
+      metadata: { courseId: course.id, userId, couponCode: couponCode || '' },
+      success_url: `${clientUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}&courseId=${course.id}`,
+      cancel_url: `${clientUrl}/course/${course.id}?payment=cancelled`,
+    })
 
   res.json({ success: true, url: session.url, sessionId: session.id })
 }
