@@ -12,7 +12,7 @@ const sendMessage = async (req, res) => {
   try {
     const { data, error } = await resend.emails.send({
       from: 'LearnHub <onboarding@resend.dev>',
-      to: ['msadigli2025@gmail.com'], // Sizin emailiniz
+      to: ['sadiqli2024@gmail.com'], // Resend qeydiyyat emailiniz
       reply_to: email,
       subject: subject ? `LearnHub ${subject}` : `LearnHub Yeni Mesaj: ${name}`,
       html: `
