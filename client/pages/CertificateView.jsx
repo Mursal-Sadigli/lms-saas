@@ -56,14 +56,14 @@ export default function CertificateView() {
       <div className="max-w-4xl mx-auto flex flex-col gap-6">
         
         {/* Print Helper Bar */}
-        <div className="bg-white p-4 rounded-xl shadow-sm flex items-center justify-between print:hidden">
-          <div className="flex items-center gap-2 text-emerald-600 font-medium">
-            <ShieldCheck size={20} />
-            Bu sertifikat rəsmi olaraq təsdiqlənmişdir
+        <div className="bg-white p-4 md:p-5 rounded-xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 print:hidden">
+          <div className="flex flex-col sm:flex-row items-center gap-2 text-emerald-600 font-medium text-sm sm:text-base text-center sm:text-left">
+            <ShieldCheck size={24} className="shrink-0" />
+            <span>Bu sertifikat rəsmi olaraq təsdiqlənmişdir</span>
           </div>
           <button 
             onClick={printCertificate}
-            className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer"
+            className="w-full sm:w-auto flex justify-center items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-6 py-2.5 rounded-xl font-semibold transition-colors border-0 cursor-pointer shadow-sm hover:shadow-md"
           >
             <Download size={18} /> PDF Kimi Yüklə
           </button>
