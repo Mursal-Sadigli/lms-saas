@@ -282,9 +282,9 @@ export default function Home() {
             {/* Info */}
             <div className="flex flex-col gap-4">
               {[
-                { icon: <Mail size={20} />, label: 'Email', value: 'info@learnhub.az' },
-                { icon: <Phone size={20} />, label: 'Telefon', value: '+994 50 123 45 67' },
-                { icon: <MapPin size={20} />, label: 'Ünvan', value: 'Bakı, Azərbaycan' },
+                { icon: <Mail size={20} />, label: 'Email', value: 'msadigli2025@gmail.com' },
+                { icon: <Phone size={20} />, label: 'Telefon', value: '+994 70 236 42 00' },
+                { icon: <MapPin size={20} />, label: 'Ünvan', value: 'Lənkəran, Azərbaycan' },
                 { icon: <Clock size={20} />, label: 'İş saatları', value: 'B.e – Cümə: 09:00 – 18:00' },
               ].map((c, i) => (
                 <div key={i} className="flex items-center gap-4 bg-white dark:bg-slate-800 rounded-xl p-4 border border-gray-100 dark:border-slate-700 shadow-sm transition-colors">
