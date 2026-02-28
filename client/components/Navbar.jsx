@@ -127,6 +127,9 @@ export default function Navbar() {
             )}
           </div>
           <SignedIn>
+            <Link to="/student/dashboard" className="flex items-center gap-2 bg-violet-50 dark:bg-slate-800 text-violet-700 dark:text-violet-400 px-3 py-1.5 rounded-lg border border-violet-200 dark:border-slate-700 font-semibold text-sm hover:bg-violet-100 dark:hover:bg-slate-700 transition-colors mr-2">
+              Panelim
+            </Link>
             <UserButton afterSignOutUrl="/" />
           </SignedIn>
           <SignedOut>
@@ -189,6 +192,9 @@ export default function Navbar() {
                 <UserButton afterSignOutUrl="/" />
                 <span className="text-sm text-gray-600 dark:text-gray-300 font-medium">Hesabım</span>
               </div>
+              <Link to="/student/dashboard" onClick={() => setMobileOpen(false)} className="px-4 py-2.5 rounded-lg border-2 border-violet-600 dark:border-violet-500 text-violet-600 dark:text-violet-400 font-semibold text-sm text-center hover:bg-violet-50 dark:hover:bg-slate-800 transition-colors mb-2">
+                Tələbə Paneli
+              </Link>
             </SignedIn>
             <SignedOut>
               <Link to="/sign-in" onClick={() => setMobileOpen(false)} className="px-4 py-2.5 rounded-lg border-2 border-violet-600 dark:border-violet-500 text-violet-600 dark:text-violet-400 font-semibold text-sm text-center hover:bg-violet-50 dark:hover:bg-slate-800 transition-colors">

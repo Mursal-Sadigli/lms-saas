@@ -44,6 +44,15 @@ const getLearnData = async (req, res) => {
     const completedCount = videos.filter(v => v.completed).length
     const progress = videos.length > 0 ? Math.round((completedCount / videos.length) * 100) : 0
 
+    // Əgər istifadəçinin proqresi artıq 100%-dirsə və ya əvvəllər bitiribsə, sertifikatını avtomatik ver.
+    if (progress === 100 || progress > 99) {
+      await sql`
+        INSERT INTO certificates (user_id, course_id)
+        VALUES (${userId}, ${courseId})
+        ON CONFLICT (user_id, course_id) DO NOTHING
+      `
+    }
+
     res.json({
       success: true,
       course,
@@ -111,6 +120,15 @@ const completeVideo = async (req, res) => {
       SELECT id, title FROM course_videos
       WHERE course_id = ${video.course_id} AND position = ${video.position + 1}
     `
+
+    // TAMAMLANMA (100%) ZAMANI SERTİFİKAT VERİLMƏSİ
+    if (progress === 100 || progress > 99) {
+      await sql`
+        INSERT INTO certificates (user_id, course_id)
+        VALUES (${userId}, ${video.course_id})
+        ON CONFLICT (user_id, course_id) DO NOTHING
+      `
+    }
 
     res.json({ success: true, progress, nextVideoId: nextVideo?.id || null })
   } catch (err) {
