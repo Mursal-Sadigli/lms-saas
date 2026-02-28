@@ -55,15 +55,33 @@ const updateProgress = async (req, res) => {
   const { courseId } = req.params
   const { progress } = req.body
 
-  const [enrollment] = await sql`
-    UPDATE enrollments
-    SET progress = ${progress}
-    WHERE user_id = ${userId} AND course_id = ${courseId}
-    RETURNING *
-  `
+  let enrollment = null
+  const [existing] = await sql`SELECT id FROM enrollments WHERE user_id = ${userId} AND course_id = ${courseId}`
+  
+  if (existing) {
+    const [updated] = await sql`
+      UPDATE enrollments SET progress = GREATEST(progress, ${progress})
+      WHERE user_id = ${userId} AND course_id = ${courseId}
+      RETURNING *
+    `
+    enrollment = updated
+  } else {
+    // Abunəliklə girənlər üçün enrollment yaradırıq
+    const [inserted] = await sql`
+      INSERT INTO enrollments (user_id, course_id, payment_id, amount_paid, progress)
+      VALUES (${userId}, ${courseId}, 'subscription_access', 0, ${progress})
+      RETURNING *
+    `
+    enrollment = inserted
+  }
 
-  if (!enrollment) {
-    return res.status(404).json({ error: 'Qeydiyyat tapılmadı' })
+  // Əgər progress 100%-dirsə Sertifikat ver:
+  if (progress === 100 || progress > 99) {
+    await sql`
+      INSERT INTO certificates (user_id, course_id)
+      VALUES (${userId}, ${courseId})
+      ON CONFLICT (user_id, course_id) DO NOTHING
+    `
   }
 
   res.json({ success: true, enrollment })

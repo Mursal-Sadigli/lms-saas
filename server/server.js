@@ -34,6 +34,7 @@ app.use('/api/educator', require('./routes/educatorRoutes'))
 app.use('/api/contact', require('./routes/contactRoutes'))
 app.use('/api/public', require('./routes/publicRoutes'))
 app.use('/api/gamification', require('./routes/gamificationRoutes'))
+app.use('/api/certificates', require('./routes/certificateRoutes'))
 
 // ── Health check ────────────────────────────
 app.get('/api/health', async (req, res) => {

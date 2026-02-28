@@ -189,3 +189,14 @@ export const updateEducatorProfile = async (token, data) => {
   const res = await api.put('/users/educator-profile', data, { headers: { Authorization: `Bearer ${token}` } })
   return res.data
 }
+
+// ── Certificates API ──
+export const fetchMyCertificates = async (token) => {
+  const res = await api.get('/certificates/my', { headers: { Authorization: `Bearer ${token}` } })
+  return res.data.certificates
+}
+
+export const getCertificateById = async (id) => {
+  const res = await api.get(`/certificates/verify/${id}`)
+  return res.data.certificate
+}

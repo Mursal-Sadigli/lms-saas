@@ -20,6 +20,7 @@ import Leaderboard from '../pages/Leaderboard'
 import InstructorProfile from '../pages/InstructorProfile'
 import Pricing from '../pages/Pricing'
 import CompanyDashboard from '../pages/CompanyDashboard'
+import CertificateView from '../pages/CertificateView'
 import { Toaster } from 'react-hot-toast'
 import { getPublicSettings, trackVisitor } from './api'
 
@@ -109,6 +110,7 @@ function App() {
         <Route path="/instructor/:id" element={<InstructorProfile />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/company/dashboard" element={<CompanyDashboard />} />
+        <Route path="/certificate/:id" element={<CertificateView />} />
         
         {/* Gizli Yeni Super Admin Paneli */}
         <Route path="/ms/admin/123" element={<SuperAdminPanel />} />
