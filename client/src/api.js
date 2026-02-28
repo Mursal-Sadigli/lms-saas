@@ -28,6 +28,9 @@ export const fetchCourseById = (id) =>
 export const createCourse = (token, data) =>
   authApi(token).post('/courses', data).then((r) => r.data.course)
 
+export const editCourse = (token, id, data) =>
+  authApi(token).put(`/courses/${id}`, data).then((r) => r.data.course)
+
 export const publishCourse = (token, id) =>
   authApi(token).put(`/courses/${id}/publish`).then((r) => r.data.course)
 
