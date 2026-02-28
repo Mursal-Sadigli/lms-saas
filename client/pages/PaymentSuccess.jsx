@@ -26,7 +26,7 @@ export default function PaymentSuccess() {
         const res = await authApi(token).get(`/payments/verify?sessionId=${sessionId}`)
         setStatus('success')
         
-        const targetUrl = res.data.redirectUrl || '/student/dashboard'
+        const targetUrl = res.data.redirectUrl || '/courses'
         setTimeout(() => navigate(targetUrl), 2000)
       } catch (err) {
         console.error(err)

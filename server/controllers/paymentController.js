@@ -175,7 +175,7 @@ const verifyPayment = async (req, res) => {
       `
     }
     
-    return res.json({ success: true, redirectUrl: planType === 'enterprise' ? '/company/dashboard' : '/student/dashboard' })
+    return res.json({ success: true, redirectUrl: planType === 'enterprise' ? '/company/dashboard' : '/courses' })
   }
 
   const { courseId, couponCode } = session.metadata
