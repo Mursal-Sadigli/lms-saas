@@ -161,3 +161,19 @@ export const clearAdminVisitors = async (token) => {
   const res = await api.delete('/admin/visitors', { headers: { Authorization: `Bearer ${token}` } })
   return res.data
 }
+
+// ── Gamification (XP & Streak) API ──
+export const syncUserStreak = async (token) => {
+  const res = await api.post('/gamification/sync-streak', {}, { headers: { Authorization: `Bearer ${token}` } })
+  return res.data // { streak_count, xp }
+}
+
+export const earnXP = async (token, amount) => {
+  const res = await api.post('/gamification/earn-xp', { amount }, { headers: { Authorization: `Bearer ${token}` } })
+  return res.data // { streak_count, xp }
+}
+
+export const getLeaderboard = async () => {
+  const res = await api.get('/gamification/leaderboard')
+  return res.data
+}

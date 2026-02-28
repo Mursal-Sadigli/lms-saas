@@ -3,7 +3,7 @@ import { SignedIn, SignedOut, UserButton, useAuth } from '@clerk/clerk-react'
 import { BookOpen, Home, Info, Mail, BookMarked, Menu, X, Moon, Sun, Bell, Heart } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useTheme } from '../src/context/ThemeContext'
-import { getWishlist } from '../src/api'
+import { getWishlist, syncUserStreak } from '../src/api'
 import toast from 'react-hot-toast'
 
 const navItems = [
@@ -18,15 +18,23 @@ export default function Navbar() {
   const { theme, toggleTheme } = useTheme()
   const { getToken, isSignedIn } = useAuth()
   const [wishlistCount, setWishlistCount] = useState(0)
+  const [gamification, setGamification] = useState({ xp: 0, streak_count: 0 })
 
   useEffect(() => {
     if (isSignedIn) {
       getToken()
-        .then(token => getWishlist(token))
-        .then(data => setWishlistCount(data?.length || 0))
+        .then(token => {
+           getWishlist(token).then(data => setWishlistCount(data?.length || 0)).catch(() => {})
+           
+           // Gamification streak update & fetch on login
+           syncUserStreak(token).then(data => {
+             if(data) setGamification({ xp: data.xp || 0, streak_count: data.streak_count || 0 })
+           }).catch(() => {})
+        })
         .catch(() => {})
     } else {
       setWishlistCount(0)
+      setGamification({ xp: 0, streak_count: 0 })
     }
 
     const handleWishlistUpdate = (e) => {
@@ -37,7 +45,17 @@ export default function Navbar() {
     }
 
     window.addEventListener('wishlistUpdated', handleWishlistUpdate)
-    return () => window.removeEventListener('wishlistUpdated', handleWishlistUpdate)
+    
+    // Listen for XP rewards globally
+    const handleGamificationUpdate = (e) => {
+       if (e.detail?.xp) setGamification(prev => ({ ...prev, xp: prev.xp + e.detail.xp }))
+    }
+    window.addEventListener('gamificationUpdated', handleGamificationUpdate)
+    
+    return () => {
+      window.removeEventListener('wishlistUpdated', handleWishlistUpdate)
+      window.removeEventListener('gamificationUpdated', handleGamificationUpdate)
+    }
   }, [isSignedIn, getToken])
 
   const showNotifications = () => {
@@ -66,6 +84,17 @@ export default function Navbar() {
 
         {/* Auth & Actions */}
         <div className="hidden md:flex items-center gap-3">
+          {isSignedIn && (
+             <Link to="/leaderboard" className="flex items-center gap-3 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full border border-gray-200 dark:border-slate-700 mr-1 shadow-inner hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors no-underline">
+                <div className="flex items-center gap-1.5 font-bold text-sm text-orange-500" title="Ardıcıl giriş günləri">
+                   🔥 {gamification.streak_count}
+                </div>
+                <div className="w-px h-4 bg-gray-300 dark:bg-slate-600"></div>
+                <div className="flex items-center gap-1.5 font-bold text-sm text-yellow-500" title="Topladığınız təcrübə xalları">
+                   ⭐ {gamification.xp}
+                </div>
+             </Link>
+          )}
           <div className="flex items-center gap-1 border-r border-gray-200 dark:border-slate-700 pr-3 mr-1">
             <button 
               onClick={toggleTheme} 
@@ -146,6 +175,16 @@ export default function Navbar() {
           ))}
           <div className="border-t border-gray-100 dark:border-slate-800 mt-3 pt-3 flex flex-col gap-2">
             <SignedIn>
+              <Link to="/leaderboard" onClick={() => setMobileOpen(false)} className="flex items-center justify-between px-3 py-2 bg-slate-50 dark:bg-slate-800/50 rounded-xl mb-2 no-underline hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                 <div className="flex items-center gap-4">
+                   <div className="flex items-center gap-1.5 font-bold text-sm text-orange-500">
+                     🔥 {gamification.streak_count} Gün
+                   </div>
+                   <div className="flex items-center gap-1.5 font-bold text-sm text-yellow-500">
+                     ⭐ {gamification.xp} XP
+                   </div>
+                 </div>
+              </Link>
               <div className="flex items-center gap-3 px-3 py-2">
                 <UserButton afterSignOutUrl="/" />
                 <span className="text-sm text-gray-600 dark:text-gray-300 font-medium">Hesabım</span>

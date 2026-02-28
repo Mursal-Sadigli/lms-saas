@@ -16,6 +16,7 @@ import Wishlist from '../pages/Wishlist'
 import LearnPage from '../pages/LearnPage'
 import PaymentSuccess from '../pages/PaymentSuccess'
 import MaintenancePage from '../pages/MaintenancePage'
+import Leaderboard from '../pages/Leaderboard'
 import { Toaster } from 'react-hot-toast'
 import { getPublicSettings, trackVisitor } from './api'
 
@@ -101,6 +102,7 @@ function App() {
         <Route path="/payment/success" element={<PaymentSuccess />} />
         <Route path="/student/dashboard" element={<StudentDashboard />} />
         <Route path="/wishlist" element={<Wishlist />} />
+        <Route path="/leaderboard" element={<Leaderboard />} />
         {/* Gizli Yeni Super Admin Paneli */}
         <Route path="/ms/admin/123" element={<SuperAdminPanel />} />
 
