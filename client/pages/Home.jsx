@@ -131,7 +131,7 @@ export default function Home() {
       setSent(true)
       setContactForm({ name: '', email: '', message: '' })
     } catch(err) {
-      alert("Xəta baş verdi. Daha sonra cəhd edin.")
+      alert(err.response?.data?.error || "Xəta baş verdi. Daha sonra cəhd edin.")
     }
   }
 

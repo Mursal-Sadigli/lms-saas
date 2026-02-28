@@ -21,7 +21,7 @@ export default function Contact() {
       setSent(true)
       setForm({ name: '', email: '', subject: '', message: '' })
     } catch (err) {
-      alert("Xəta baş verdi. Daha sonra yenidən cəhd edin.")
+      alert(err.response?.data?.error || "Xəta baş verdi. Daha sonra yenidən cəhd edin.")
     }
   }
 

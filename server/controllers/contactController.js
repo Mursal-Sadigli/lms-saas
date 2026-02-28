@@ -10,7 +10,7 @@ const sendMessage = async (req, res) => {
   }
 
   try {
-    const data = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: 'LearnHub <onboarding@resend.dev>',
       to: ['msadigli2025@gmail.com'], // Sizin emailiniz
       reply_to: email,
@@ -23,6 +23,11 @@ const sendMessage = async (req, res) => {
         <p>${message.replace(/\n/g, '<br/>')}</p>
       `
     });
+
+    if (error) {
+       console.error("Resend daxili xəta:", error);
+       return res.status(400).json({ error: error.message });
+    }
 
     res.status(200).json({ success: true, data });
   } catch (error) {
