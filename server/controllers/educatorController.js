@@ -3,7 +3,7 @@ const { neon } = require('@neondatabase/serverless');
 const getAnalytics = async (req, res) => {
   const sql = neon(process.env.DATABASE_URL);
   try {
-    const educator_id = req.user.id;
+    const educator_id = req.auth.userId;
     
     // Yalnız son 30 günün datası
     const sales = await sql`
