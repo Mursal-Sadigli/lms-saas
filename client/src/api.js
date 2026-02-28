@@ -177,3 +177,15 @@ export const getLeaderboard = async () => {
   const res = await api.get('/gamification/leaderboard')
   return res.data
 }
+
+// ── Instructor Profile API ──
+export const getInstructorProfile = async (id) => {
+  const res = await api.get(`/public/instructor/${id}`)
+  return res.data // { instructor, courses }
+}
+
+export const updateEducatorProfile = async (token, data) => {
+  // We will need PUT /api/users/educator-profile for this
+  const res = await api.put('/users/educator-profile', data, { headers: { Authorization: `Bearer ${token}` } })
+  return res.data
+}

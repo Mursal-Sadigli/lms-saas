@@ -78,6 +78,56 @@ const createCheckoutSession = async (req, res) => {
   res.json({ success: true, url: session.url, sessionId: session.id })
 }
 
+// POST /api/payments/subscribe — Aylıq / İllik B2B/B2C paketləri almaq (SaaS)
+const createSubscriptionSession = async (req, res) => {
+  const { planType } = req.body // 'monthly', 'yearly', 'enterprise'
+  const userId = req.auth.userId
+
+  if (!['monthly', 'yearly', 'enterprise'].includes(planType)) {
+    return res.status(400).json({ error: 'Yanlış abunəlik planı seçilmişdir' })
+  }
+
+  try {
+    const clientUrl = process.env.CLIENT_URL || req.headers.origin || 'http://localhost:5173'
+    const stripe = await getStripeInstance()
+
+    let unitAmount = 2000 // default $20.00
+    let interval = 'month'
+    let productName = 'LearnHub B2C Aylıq Abunəlik'
+
+    if (planType === 'yearly') {
+      unitAmount = 20000 // $200.00
+      interval = 'year'
+      productName = 'LearnHub B2C İllik Abunəlik'
+    } else if (planType === 'enterprise') {
+      unitAmount = 50000 // $500.00
+      interval = 'month'
+      productName = 'LearnHub B2B Enterprise Şirkət Planı'
+    }
+
+    const price = await stripe.prices.create({
+      unit_amount: unitAmount,
+      currency: 'usd',
+      recurring: { interval },
+      product_data: { name: productName },
+    })
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'subscription',
+      line_items: [{ price: price.id, quantity: 1 }],
+      metadata: { userId, planType },
+      success_url: `${clientUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}&type=subscription`,
+      cancel_url: `${clientUrl}/pricing?payment=cancelled`,
+    })
+
+    res.json({ success: true, url: session.url, sessionId: session.id })
+  } catch (error) {
+    console.error('Subscription error:', error)
+    res.status(500).json({ error: error.message })
+  }
+}
+
 // GET /api/payments/verify?sessionId=xxx — ödənişi yoxla, enrollment yarat, /learn-ə yönləndir
 const verifyPayment = async (req, res) => {
   const { sessionId } = req.query
@@ -125,19 +175,134 @@ const stripeWebhook = async (req, res) => {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object
-    const { courseId, userId, couponCode } = session.metadata
-    const result = await sql`
-      INSERT INTO enrollments (user_id, course_id, payment_id, amount_paid)
-      VALUES (${userId}, ${courseId}, ${session.payment_intent}, ${session.amount_total / 100})
-      ON CONFLICT (user_id, course_id) DO NOTHING
-      RETURNING id
+    
+    // ƏGƏR ABUNƏLİKDİRSƏ (SaaS)
+    if (session.mode === 'subscription') {
+      const { userId, planType } = session.metadata
+      const subscriptionId = session.subscription
+      const customerId = session.customer
+      
+      const stripeInstance = await getStripeInstance()
+      const subscription = await stripeInstance.subscriptions.retrieve(subscriptionId)
+
+      let companyId = null
+      if (planType === 'enterprise') {
+        const [company] = await sql`
+          INSERT INTO companies (name, admin_id)
+          VALUES ('Yeni Şirkət', ${userId})
+          RETURNING id
+        `
+        companyId = company.id
+      }
+
+      await sql`
+        INSERT INTO subscriptions (user_id, company_id, stripe_customer_id, stripe_subscription_id, plan_type, status, current_period_start, current_period_end)
+        VALUES (${userId}, ${companyId}, ${customerId}, ${subscriptionId}, ${planType}, ${subscription.status}, to_timestamp(${subscription.current_period_start}), to_timestamp(${subscription.current_period_end}))
+      `
+
+      const subStatus = planType === 'enterprise' ? 'b2b_enterprise' : (planType === 'yearly' ? 'b2c_yearly' : 'b2c_monthly')
+      await sql`
+        UPDATE users 
+        SET subscription_status = ${subStatus}, company_id = COALESCE(${companyId}, company_id)
+        WHERE id = ${userId}
+      `
+      console.log(`✅ Subscription Created: user=${userId}, plan=${planType}`)
+    } 
+    // ƏGƏR BİRDƏFƏLİK KURS ALINMASIDIRSA
+    else {
+      const { courseId, userId, couponCode } = session.metadata
+      const result = await sql`
+        INSERT INTO enrollments (user_id, course_id, payment_id, amount_paid)
+        VALUES (${userId}, ${courseId}, ${session.payment_intent}, ${session.amount_total / 100})
+        ON CONFLICT (user_id, course_id) DO NOTHING
+        RETURNING id
+      `
+      if (result.length > 0 && couponCode) {
+        await sql`UPDATE coupons SET used_count = used_count + 1 WHERE code = ${couponCode}`
+      }
+    }
+  } 
+  else if (event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.deleted') {
+    const subscription = event.data.object
+    const status = subscription.status
+    
+    await sql`
+      UPDATE subscriptions 
+      SET status = ${status}, 
+          current_period_start = to_timestamp(${subscription.current_period_start}), 
+          current_period_end = to_timestamp(${subscription.current_period_end})
+      WHERE stripe_subscription_id = ${subscription.id}
     `
-    if (result.length > 0 && couponCode) {
-      await sql`UPDATE coupons SET used_count = used_count + 1 WHERE code = ${couponCode}`
+    // Əgər cancelled olubsa user-in lisenziyasını ləğv et
+    if (status === 'canceled' || status === 'unpaid') {
+      await sql`
+        UPDATE users 
+        SET subscription_status = 'free' 
+        WHERE id = (SELECT user_id FROM subscriptions WHERE stripe_subscription_id = ${subscription.id})
+           OR company_id = (SELECT company_id FROM subscriptions WHERE stripe_subscription_id = ${subscription.id})
+      `
     }
   }
 
   res.json({ received: true })
 }
 
-module.exports = { createCheckoutSession, verifyPayment, stripeWebhook }
+// B2B şirkət idarəsi (İşçilərin emaillərinin əlavə edilməsi / Təsdiqi)
+const addCompanyEmployee = async (req, res) => {
+  const { email } = req.body
+  const adminId = req.auth.userId
+  
+  try {
+    const [company] = await sql`SELECT id FROM companies WHERE admin_id = ${adminId}`
+    if (!company) return res.status(403).json({ error: 'Sizin şirkət profiliniz yoxdur.' })
+      
+    await sql`
+      INSERT INTO company_invitations (company_id, email, status)
+      VALUES (${company.id}, ${email}, 'pending')
+      ON CONFLICT (company_id, email) DO NOTHING
+    `
+    // Check if user already exists
+    const [user] = await sql`SELECT id FROM users WHERE email_addresses @> ${JSON.stringify([{email_address: email}])}::jsonb`
+    if (user) {
+      await sql`UPDATE users SET company_id = ${company.id}, subscription_status = 'b2b_enterprise' WHERE id = ${user.id}`
+      await sql`UPDATE company_invitations SET status = 'accepted' WHERE email = ${email}`
+    }
+
+    res.json({ success: true, message: 'İşçi əlavə edildi' })
+  } catch (e) {
+    res.status(500).json({ error: e.message })
+  }
+}
+
+const getCompanyEmployees = async (req, res) => {
+  const adminId = req.auth.userId
+  try {
+    const [company] = await sql`SELECT id FROM companies WHERE admin_id = ${adminId}`
+    if (!company) return res.status(403).json({ error: 'Şirkət profiliniz yoxdur.' })
+    
+    const employees = await sql`
+      SELECT c.email, c.status, u.first_name, u.last_name, u.created_at
+      FROM company_invitations c
+      LEFT JOIN users u ON u.email_addresses @> jsonb_build_array(jsonb_build_object('email_address', c.email))
+      WHERE c.company_id = ${company.id}
+    `
+    res.json({ success: true, employees })
+  } catch (e) {
+    res.status(500).json({ error: e.message })
+  }
+}
+
+const removeCompanyEmployee = async (req, res) => {
+  const { email } = req.body
+  const adminId = req.auth.userId
+  try {
+    const [company] = await sql`SELECT id FROM companies WHERE admin_id = ${adminId}`
+    await sql`DELETE FROM company_invitations WHERE company_id = ${company.id} AND email = ${email}`
+    await sql`UPDATE users SET company_id = NULL, subscription_status = 'free' WHERE company_id = ${company.id} AND email_addresses @> jsonb_build_array(jsonb_build_object('email_address', ${email}))`
+    res.json({ success: true })
+  } catch (e) {
+    res.status(500).json({ error: e.message })
+  }
+}
+
+module.exports = { createCheckoutSession, verifyPayment, stripeWebhook, createSubscriptionSession, addCompanyEmployee, getCompanyEmployees, removeCompanyEmployee }

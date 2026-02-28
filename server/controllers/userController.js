@@ -62,6 +62,27 @@ const updateRole = async (req, res) => {
   res.json({ success: true, user })
 }
 
+// PUT /api/users/educator-profile
+const updateEducatorProfile = async (req, res) => {
+  const userId = req.auth.userId
+  const { bio, youtube_link, linkedin_link } = req.body
+
+  try {
+    const [user] = await sql`
+      UPDATE users 
+      SET bio = ${bio || null}, 
+          youtube_link = ${youtube_link || null}, 
+          linkedin_link = ${linkedin_link || null},
+          updated_at = NOW()
+      WHERE id = ${userId}
+      RETURNING *
+    `
+    res.json({ success: true, user })
+  } catch(e) {
+    res.status(500).json({ error: e.message })
+  }
+}
+
 // POST /api/users/wishlist — wishlist-ə əlavə et və ya sil (toggle)
 const toggleWishlist = async (req, res) => {
   const userId = req.auth.userId
@@ -113,4 +134,4 @@ const getWishlist = async (req, res) => {
   }
 }
 
-module.exports = { getProfile, syncUser, updateRole, toggleWishlist, getWishlist }
+module.exports = { getProfile, syncUser, updateRole, toggleWishlist, getWishlist, updateEducatorProfile }

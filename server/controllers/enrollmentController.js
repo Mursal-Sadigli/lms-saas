@@ -75,6 +75,11 @@ const checkEnrollment = async (req, res) => {
     const userId = req.auth.userId
     const { courseId } = req.params
 
+    const [user] = await sql`SELECT subscription_status FROM users WHERE id = ${userId}`
+    if (user && user.subscription_status && user.subscription_status !== 'free') {
+      return res.json({ success: true, enrolled: true })
+    }
+
     const [enrollment] = await sql`
       SELECT id FROM enrollments WHERE user_id = ${userId} AND course_id = ${courseId}
     `

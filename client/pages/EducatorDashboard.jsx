@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useUser, useAuth } from '@clerk/clerk-react'
 import { Link } from 'react-router-dom'
-import { PlusCircle, BookOpen, Users, DollarSign, TrendingUp, Edit, Eye, UploadCloud, Tag, Trash2, BarChart2 } from 'lucide-react'
+import { PlusCircle, BookOpen, Users, DollarSign, TrendingUp, Edit, Eye, UploadCloud, Tag, Trash2, BarChart2, User } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { fetchEducatorCourses, publishCourse, fetchEducatorAnalytics, fetchEducatorCoupons, createCoupon, deleteCoupon } from '../src/api'
+import { fetchEducatorCourses, publishCourse, fetchEducatorAnalytics, fetchEducatorCoupons, createCoupon, deleteCoupon, fetchProfile, updateEducatorProfile } from '../src/api'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 export default function EducatorDashboard() {
@@ -16,9 +16,12 @@ export default function EducatorDashboard() {
   const [loading, setLoading] = useState(true)
   const [publishingId, setPublishingId] = useState(null)
   
-  const [activeTab, setActiveTab] = useState('courses') // courses, analytics, coupons
+  const [activeTab, setActiveTab] = useState('courses') // courses, analytics, coupons, profile
   
   const [couponForm, setCouponForm] = useState({ code: '', discount_percent: 10, max_uses: '' })
+  
+  const [profileForm, setProfileForm] = useState({ bio: '', youtube_link: '', linkedin_link: '' })
+  const [profileSaving, setProfileSaving] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -27,14 +30,20 @@ export default function EducatorDashboard() {
   const loadData = async () => {
     try {
       const token = await getToken()
-      const [coursesData, salesData, couponsData] = await Promise.all([
+      const [coursesData, salesData, couponsData, userProfile] = await Promise.all([
         fetchEducatorCourses(token),
         fetchEducatorAnalytics(token),
-        fetchEducatorCoupons(token)
+        fetchEducatorCoupons(token),
+        fetchProfile(token)
       ])
       setCourses(coursesData)
       setSales(salesData)
       setCoupons(couponsData)
+      setProfileForm({
+        bio: userProfile?.bio || '',
+        youtube_link: userProfile?.youtube_link || '',
+        linkedin_link: userProfile?.linkedin_link || ''
+      })
     } catch (err) {
       console.error(err)
     } finally {
@@ -85,6 +94,20 @@ export default function EducatorDashboard() {
       toast.success('Kupon silindi!')
     } catch (err) {
       toast.error('Xəta baş verdi')
+    }
+  }
+
+  const handleProfileSave = async (e) => {
+    e.preventDefault()
+    setProfileSaving(true)
+    try {
+      const token = await getToken()
+      await updateEducatorProfile(token, profileForm)
+      toast.success('Şəxsi məlumatlar müvəffəqiyyətlə yeniləndi!')
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Xəta baş verdi')
+    } finally {
+      setProfileSaving(false)
     }
   }
 
@@ -146,6 +169,12 @@ export default function EducatorDashboard() {
         >
           <Tag size={18} /> Promo Kodlar
           <span className="bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 text-xs px-2 py-0.5 rounded-full ml-1">{coupons.length}</span>
+        </button>
+        <button 
+          onClick={() => setActiveTab('profile')} 
+          className={`pb-3 font-semibold text-sm flex items-center gap-2 transition-colors cursor-pointer border-0 bg-transparent whitespace-nowrap ${activeTab === 'profile' ? 'text-violet-600 dark:text-violet-400 border-b-2 border-violet-600 dark:border-violet-400' : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'}`}
+        >
+          <User size={18} /> Profil Ayarları
         </button>
       </div>
 
@@ -272,6 +301,61 @@ export default function EducatorDashboard() {
                </div>
              )}
           </div>
+        </div>
+      )}
+
+      {activeTab === 'profile' && (
+        <div className="max-w-3xl bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-6 md:p-8">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Profil Ayarları</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">Tələbələrinizə özünüzü tanıdın, təcrübələrinizdən bəhs edin və sosial şəbəkələrinizi əlavə edin.</p>
+
+          <form onSubmit={handleProfileSave} className="flex flex-col gap-6">
+            <div>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block">Haqqımda (Bio)</label>
+              <textarea 
+                value={profileForm.bio} 
+                onChange={e => setProfileForm({...profileForm, bio: e.target.value})} 
+                placeholder="Özünüz barədə ətraflı məlumat verin..." 
+                rows="5"
+                className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 text-gray-900 dark:text-white transition-all resize-y"
+              ></textarea>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block">YouTube Kanalı</label>
+                <input 
+                  type="url"
+                  value={profileForm.youtube_link} 
+                  onChange={e => setProfileForm({...profileForm, youtube_link: e.target.value})} 
+                  placeholder="https://youtube.com/@adiniz" 
+                  className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 text-gray-900 dark:text-white transition-all" 
+                />
+              </div>
+              <div>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block">LinkedIn Hesabı</label>
+                <input 
+                  type="url"
+                  value={profileForm.linkedin_link} 
+                  onChange={e => setProfileForm({...profileForm, linkedin_link: e.target.value})} 
+                  placeholder="https://linkedin.com/in/adiniz" 
+                  className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 text-gray-900 dark:text-white transition-all" 
+                />
+              </div>
+            </div>
+
+            <div className="pt-4 flex justify-end">
+              <button 
+                type="submit" 
+                disabled={profileSaving}
+                className="px-8 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-bold transition-colors cursor-pointer border-0 disabled:opacity-70 flex items-center gap-2"
+              >
+                {profileSaving ? (
+                  <><div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin"/> Saxlanılır...</>
+                ) : 'Yadda Saxla'}
+              </button>
+            </div>
+          </form>
         </div>
       )}
 

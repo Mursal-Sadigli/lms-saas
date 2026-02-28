@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { SignedIn, SignedOut, UserButton, useAuth } from '@clerk/clerk-react'
-import { BookOpen, Home, Info, Mail, BookMarked, Menu, X, Moon, Sun, Bell, Heart } from 'lucide-react'
+import { BookOpen, Home, Info, Mail, BookMarked, Menu, X, Moon, Sun, Bell, Heart, Zap } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useTheme } from '../src/context/ThemeContext'
 import { getWishlist, syncUserStreak } from '../src/api'
@@ -9,8 +9,8 @@ import toast from 'react-hot-toast'
 const navItems = [
   { to: '/', label: 'Ana Səhifə', icon: <Home size={16} /> },
   { to: '/courses', label: 'Kurslar', icon: <BookMarked size={16} /> },
+  { to: '/pricing', label: 'Limitsiz Paket', icon: <Zap size={16} className="text-amber-500" /> },
   { to: '/about', label: 'Haqqında', icon: <Info size={16} /> },
-  { to: '/contact', label: 'Əlaqə', icon: <Mail size={16} /> },
 ]
 
 export default function Navbar() {

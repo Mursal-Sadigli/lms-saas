@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { requireAuth } = require('@clerk/express')
+const { requireAuth } = require('../middleware/auth')
 const { syncUserStreak, earnXP, getLeaderboard } = require('../controllers/gamificationController')
 
 // Public (Heç bir identifikasiya istəmir)
