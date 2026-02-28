@@ -37,9 +37,9 @@ export default function Contact() {
           <div className="flex flex-col gap-5">
             <h2 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2">Əlaqə Məlumatları</h2>
             {[
-              { icon: <Mail size={20} />, label: 'Email', value: 'info@learnhub.az', href: 'mailto:info@learnhub.az' },
-              { icon: <Phone size={20} />, label: 'Telefon', value: '+994 50 123 45 67', href: 'tel:+994501234567' },
-              { icon: <MapPin size={20} />, label: 'Ünvan', value: 'Bakı, Azərbaycan', href: null },
+              { icon: <Mail size={20} />, label: 'Email', value: 'msadigli2025@gmail.com', href: 'mailto:msadigli2025@gmail.com' },
+              { icon: <Phone size={20} />, label: 'Telefon', value: '+994 70 236 42 00', href: 'tel:+994702364200' },
+              { icon: <MapPin size={20} />, label: 'Ünvan', value: 'Lənkəran, Azərbaycan', href: null },
               { icon: <Clock size={20} />, label: 'İş saatları', value: 'B.e – Cümə: 09:00 – 18:00', href: null },
             ].map((c, i) => (
               <div key={i} className="flex items-center gap-4 bg-white dark:bg-slate-900 rounded-xl p-4 border border-gray-100 dark:border-slate-800 transition-colors">
