@@ -140,4 +140,46 @@ const getEducatorCourses = async (req, res) => {
   res.json({ success: true, courses })
 }
 
-module.exports = { getAllCourses, getCourseById, createCourse, publishCourse, getEducatorCourses }
+// PUT /api/courses/:id — kursu güncəllə
+const updateCourse = async (req, res) => {
+  const { id } = req.params;
+  const { title, description, price, thumbnail, category, videos } = req.body;
+  const educatorId = req.auth.userId;
+
+  try {
+    const [course] = await sql`
+      UPDATE courses 
+      SET title = ${title}, description = ${description}, price = ${price}, thumbnail = ${thumbnail}, category = ${category}, updated_at = NOW()
+      WHERE id = ${id} AND educator_id = ${educatorId}
+      RETURNING *
+    `;
+    
+    if (!course) return res.status(404).json({ error: 'Kurs tapılmadı və ya icazəniz yoxdur' });
+
+    // Videoları yeniləmək üçün əvvəlkiləri silirik və yenilərini daxil edirik
+    await sql`DELETE FROM course_videos WHERE course_id = ${course.id}`;
+
+    if (videos && videos.length > 0) {
+      for (let i = 0; i < videos.length; i++) {
+        const v = videos[i];
+        await sql`
+          INSERT INTO course_videos (course_id, title, video_url, position, is_free, description, quiz)
+          VALUES (${course.id}, ${v.title}, ${v.videoUrl}, ${i + 1}, ${v.isFree || false}, ${v.description || ''}, ${v.quiz ? JSON.stringify(v.quiz) : null})
+        `;
+      }
+    }
+
+    res.json({ success: true, course });
+  } catch (error) {
+    res.status(500).json({ error: 'Kurs güncəllənərkən xəta baş verdi: ' + error.message });
+  }
+}
+
+module.exports = {
+  getAllCourses,
+  getCourseById,
+  createCourse,
+  publishCourse,
+  getEducatorCourses,
+  updateCourse
+}

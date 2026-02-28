@@ -10,6 +10,7 @@ import CourseDetail from '../pages/CourseDetail'
 import StudentDashboard from '../pages/StudentDashboard'
 import EducatorDashboard from '../pages/EducatorDashboard'
 import CreateCourse from '../pages/CreateCourse'
+import EditCourse from '../pages/EditCourse'
 import SuperAdminPanel from '../pages/SuperAdminPanel'
 import LearnPage from '../pages/LearnPage'
 import PaymentSuccess from '../pages/PaymentSuccess'
@@ -77,6 +78,7 @@ function App() {
         <Route path="/admin/123" element={<EducatorDashboard />} />
         <Route path="/educator/dashboard" element={<EducatorDashboard />} />
         <Route path="/educator/create-course" element={<CreateCourse />} />
+        <Route path="/educator/edit/:id" element={<EditCourse />} />
         <Route
           path="/sign-in"
           element={
