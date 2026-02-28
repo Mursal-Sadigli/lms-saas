@@ -55,4 +55,55 @@ const updateRole = async (req, res) => {
   res.json({ success: true, user })
 }
 
-module.exports = { getProfile, syncUser, updateRole }
+// POST /api/users/wishlist — wishlist-ə əlavə et və ya sil (toggle)
+const toggleWishlist = async (req, res) => {
+  const userId = req.auth.userId
+  const { courseId } = req.body
+
+  if (!courseId) return res.status(400).json({ error: 'courseId qeyd olunmayıb' })
+
+  try {
+    // Yoxla ki, kurs bazada var mı?
+    const [existing] = await sql`SELECT id FROM wishlists WHERE user_id = ${userId} AND course_id = ${courseId}`
+
+    if (existing) {
+      // Varsa sil (remove from wishlist)
+      await sql`DELETE FROM wishlists WHERE id = ${existing.id}`
+      res.json({ success: true, message: 'Kurs seçilmişlərdən silindi', isWishlisted: false })
+    } else {
+      // Yoxdursa əlavə et (add to wishlist)
+      await sql`INSERT INTO wishlists (user_id, course_id) VALUES (${userId}, ${courseId})`
+      res.json({ success: true, message: 'Kurs seçilmişlərə əlavə edildi', isWishlisted: true })
+    }
+  } catch (err) {
+    console.error('toggleWishlist xətası:', err)
+    res.status(500).json({ error: 'Sistem xətası' })
+  }
+}
+
+// GET /api/users/wishlist — tələbənin seçdiyi kursları qaytar
+const getWishlist = async (req, res) => {
+  const userId = req.auth.userId
+
+  try {
+    const wishlists = await sql`
+      SELECT 
+        w.id as wishlist_id,
+        c.id, c.title, c.thumbnail, c.category, c.price, c.description,
+        u.first_name || ' ' || COALESCE(u.last_name, '') AS educator_name,
+        (SELECT COALESCE(AVG(rating), 0) FROM reviews WHERE course_id = c.id) as rating
+      FROM wishlists w
+      JOIN courses c ON w.course_id = c.id
+      JOIN users u ON c.educator_id = u.id
+      WHERE w.user_id = ${userId}
+      ORDER BY w.created_at DESC
+    `
+
+    res.json({ success: true, wishlists })
+  } catch (err) {
+    console.error('getWishlist xətası:', err)
+    res.status(500).json({ error: 'Sistem xətası' })
+  }
+}
+
+module.exports = { getProfile, syncUser, updateRole, toggleWishlist, getWishlist }

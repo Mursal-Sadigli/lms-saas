@@ -70,6 +70,15 @@ CREATE TABLE IF NOT EXISTS reviews (
   UNIQUE(user_id, course_id)    -- bir istifadəçi bir kursa bir rəy
 );
 
+-- ── 5.5 WISHLISTS ──────────────────────────
+CREATE TABLE IF NOT EXISTS wishlists (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  course_id   UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, course_id)    -- eyni kursu iki dəfə wish listə əlavə etmək olmaz
+);
+
 -- ── 6. COUPONS ────────────────────────────
 CREATE TABLE IF NOT EXISTS coupons (
   id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),

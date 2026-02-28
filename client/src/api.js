@@ -84,3 +84,10 @@ export const validateCoupon = (token, data) =>
 // ── Contact API ────────────────────────────────
 export const sendContactMessage = (data) =>
   api.post('/contact', data).then((r) => r.data)
+
+// ── Wishlist API ───────────────────────────────
+export const getWishlist = (token) =>
+  authApi(token).get('/users/wishlist').then((r) => r.data.wishlists)
+
+export const toggleWishlist = (token, courseId) =>
+  authApi(token).post('/users/wishlist', { courseId }).then((r) => r.data)
