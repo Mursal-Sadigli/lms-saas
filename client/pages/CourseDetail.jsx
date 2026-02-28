@@ -47,7 +47,6 @@ export default function CourseDetail() {
       .then(data => setCourse(data))
       .catch(() => {
         setError('Kurs tapılmadı və ya server bağlı deyil.')
-        setCourse(demoCourse) // fallback
       })
       .finally(() => setLoading(false))
 
