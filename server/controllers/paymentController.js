@@ -165,7 +165,6 @@ const verifyPayment = async (req, res) => {
       await sql`
         INSERT INTO subscriptions (user_id, company_id, stripe_customer_id, stripe_subscription_id, plan_type, status, current_period_start, current_period_end)
         VALUES (${userId}, ${companyId}, ${customerId}, ${subscriptionId}, ${planType}, ${subscription.status}, to_timestamp(${subscription.current_period_start}), to_timestamp(${subscription.current_period_end}))
-        ON CONFLICT (stripe_subscription_id) DO NOTHING
       `
 
       const subStatus = planType === 'enterprise' ? 'b2b_enterprise' : (planType === 'yearly' ? 'b2c_yearly' : 'b2c_monthly')
