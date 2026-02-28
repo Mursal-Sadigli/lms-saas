@@ -80,3 +80,7 @@ export const deleteCoupon = (token, id) =>
 
 export const validateCoupon = (token, data) =>
   authApi(token).post('/coupons/validate', data).then((r) => r.data.coupon)
+
+// ── Contact API ────────────────────────────────
+export const sendContactMessage = (data) =>
+  api.post('/contact', data).then((r) => r.data)

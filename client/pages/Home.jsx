@@ -5,7 +5,7 @@ import {
   Send, Award, BookOpen, Clock, Users, Shield, Zap, Star
 } from 'lucide-react'
 import CourseCard from '../components/CourseCard'
-import { fetchCourses } from '../src/api'
+import { fetchCourses, sendContactMessage } from '../src/api'
 
 export const allCourses = [
   {
@@ -124,10 +124,15 @@ export default function Home() {
     return matchSearch && matchCat
   })
 
-  const handleContact = e => {
+  const handleContact = async e => {
     e.preventDefault()
-    setSent(true)
-    setContactForm({ name: '', email: '', message: '' })
+    try {
+      await sendContactMessage(contactForm)
+      setSent(true)
+      setContactForm({ name: '', email: '', message: '' })
+    } catch(err) {
+      alert("Xəta baş verdi. Daha sonra cəhd edin.")
+    }
   }
 
   return (

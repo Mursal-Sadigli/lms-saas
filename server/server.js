@@ -30,6 +30,7 @@ app.use('/api/payments', require('./routes/paymentRoutes'))
 app.use('/api/learn', require('./routes/learnRoutes'))
 app.use('/api/coupons', require('./routes/couponRoutes'))
 app.use('/api/educator', require('./routes/educatorRoutes'))
+app.use('/api/contact', require('./routes/contactRoutes'))
 
 // ── Health check ────────────────────────────
 app.get('/api/health', async (req, res) => {

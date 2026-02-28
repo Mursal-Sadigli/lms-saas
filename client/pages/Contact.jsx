@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Mail, Phone, MapPin, Send, Clock, MessageCircle } from 'lucide-react'
+import { sendContactMessage } from '../src/api'
 
 const faqs = [
   { q: 'Kurslar nə qədər müddət ərzindədir?', a: 'Kurs aldıqdan sonra ömürlük giriş əldə edirsiniz. İstənilən vaxt, istənilən tərəfdən baxmaq olar.' },
@@ -13,10 +14,15 @@ export default function Contact() {
   const [sent, setSent] = useState(false)
   const [openFaq, setOpenFaq] = useState(null)
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault()
-    setSent(true)
-    setForm({ name: '', email: '', subject: '', message: '' })
+    try {
+      await sendContactMessage(form)
+      setSent(true)
+      setForm({ name: '', email: '', subject: '', message: '' })
+    } catch (err) {
+      alert("Xəta baş verdi. Daha sonra yenidən cəhd edin.")
+    }
   }
 
   const inputCls = "w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-800 rounded-xl text-sm outline-none focus:border-violet-500 transition-colors bg-white dark:bg-slate-900 text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
