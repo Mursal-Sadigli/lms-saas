@@ -12,23 +12,26 @@ export default function PaymentSuccess() {
 
   const sessionId = searchParams.get('session_id')
   const courseId = searchParams.get('courseId')
+  const type = searchParams.get('type')
 
   useEffect(() => {
     if (!isLoaded) return // Clerk hələ yüklənir
     if (!isSignedIn) { navigate('/sign-in'); return }
-    if (!sessionId || !courseId) { navigate('/'); return }
+    if (!sessionId) { navigate('/'); return }
+    if (!courseId && type !== 'subscription') { navigate('/'); return }
 
     const verify = async () => {
       try {
         const token = await getToken()
-        await authApi(token).get(`/payments/verify?sessionId=${sessionId}`)
+        const res = await authApi(token).get(`/payments/verify?sessionId=${sessionId}`)
         setStatus('success')
-        // 2 saniyə sonra Learn səhifəsinə yönləndir
-        setTimeout(() => navigate(`/learn/${courseId}`), 2000)
+        
+        const targetUrl = res.data.redirectUrl || '/student/dashboard'
+        setTimeout(() => navigate(targetUrl), 2000)
       } catch (err) {
         console.error(err)
         setStatus('error')
-        setTimeout(() => navigate(`/course/${courseId}`), 3000)
+        setTimeout(() => navigate(type === 'subscription' ? '/pricing' : `/course/${courseId}`), 3000)
       }
     }
 
@@ -51,7 +54,9 @@ export default function PaymentSuccess() {
               <CheckCircle size={48} className="text-emerald-400" />
             </div>
             <h2 className="text-white text-2xl font-extrabold mb-2">Ödəniş uğurlu! 🎉</h2>
-            <p className="text-gray-400 text-sm mb-6">Kursunuz aktivləşdirildi. Yönləndirilirsiniz...</p>
+            <p className="text-gray-400 text-sm mb-6">
+              {type === 'subscription' ? "Abunəliyiniz aktivləşdirildi. Yönləndirilirsiniz..." : "Kursunuz aktivləşdirildi. Yönləndirilirsiniz..."}
+            </p>
             <div className="w-full bg-gray-800 rounded-full h-1.5">
               <div className="bg-emerald-500 h-1.5 rounded-full animate-pulse w-3/4" />
             </div>
@@ -63,7 +68,9 @@ export default function PaymentSuccess() {
               <XCircle size={48} className="text-red-400" />
             </div>
             <h2 className="text-white text-xl font-bold mb-2">Bir problem yarandı</h2>
-            <p className="text-gray-400 text-sm">Ödəniş qəbul edildi, amma enrollment yaradılarkən xəta baş verdi. Kurs səhifəsinə qayıdırsınız...</p>
+            <p className="text-gray-400 text-sm">
+              {type === 'subscription' ? "Ödəniş qəbul edildi, ancaq abunəlik yaradılarkən xəta baş verdi. Zəhmət olmasa yenidən cəhd edin." : "Ödəniş qəbul edildi, amma enrollment yaradılarkən xəta baş verdi. Kurs səhifəsinə qayıdırsınız..."}
+            </p>
           </>
         )}
       </div>

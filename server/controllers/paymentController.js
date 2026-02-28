@@ -135,12 +135,48 @@ const verifyPayment = async (req, res) => {
 
   if (!sessionId) return res.status(400).json({ error: 'Session ID lazımdır' })
 
-  // Stripe-dan session al
   const stripe = await getStripeInstance()
   const session = await stripe.checkout.sessions.retrieve(sessionId)
 
   if (session.payment_status !== 'paid') {
     return res.status(400).json({ error: 'Ödəniş tamamlanmayıb' })
+  }
+
+  // Əgər Abunəlik ödənişidirsə (Localhost-da webhook çalışmadığı üçün dərhal verify edirik)
+  if (session.mode === 'subscription') {
+    const { planType } = session.metadata
+    const subscriptionId = session.subscription
+    const customerId = session.customer
+
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+
+    const [existing] = await sql`SELECT id FROM subscriptions WHERE stripe_subscription_id = ${subscriptionId}`
+    if (!existing) {
+      let companyId = null
+      if (planType === 'enterprise') {
+        const [company] = await sql`
+          INSERT INTO companies (name, admin_id)
+          VALUES ('Yeni Şirkət', ${userId})
+          RETURNING id
+        `
+        companyId = company.id
+      }
+
+      await sql`
+        INSERT INTO subscriptions (user_id, company_id, stripe_customer_id, stripe_subscription_id, plan_type, status, current_period_start, current_period_end)
+        VALUES (${userId}, ${companyId}, ${customerId}, ${subscriptionId}, ${planType}, ${subscription.status}, to_timestamp(${subscription.current_period_start}), to_timestamp(${subscription.current_period_end}))
+        ON CONFLICT (stripe_subscription_id) DO NOTHING
+      `
+
+      const subStatus = planType === 'enterprise' ? 'b2b_enterprise' : (planType === 'yearly' ? 'b2c_yearly' : 'b2c_monthly')
+      await sql`
+        UPDATE users 
+        SET subscription_status = ${subStatus}, company_id = COALESCE(${companyId}, company_id)
+        WHERE id = ${userId}
+      `
+    }
+    
+    return res.json({ success: true, redirectUrl: planType === 'enterprise' ? '/company/dashboard' : '/student/dashboard' })
   }
 
   const { courseId, couponCode } = session.metadata

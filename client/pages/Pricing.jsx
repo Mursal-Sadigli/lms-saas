@@ -70,11 +70,11 @@ export default function Pricing() {
           <p className="text-lg text-gray-600 dark:text-gray-400">Kursları tək-tək almaq əvəzinə, abunə olun və platformadakı **bütün dərslərə** limitsiz çıxış əldə edin. Öz modelinizi seçin.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {plans.map((plan) => (
             <div 
               key={plan.id}
-              className={`relative bg-white dark:bg-slate-900 rounded-3xl p-8 border ${plan.popular ? 'border-violet-500 ring-4 ring-violet-500/10 shadow-2xl flex flex-col scale-100 md:scale-105 z-10' : 'border-gray-200 dark:border-slate-800 shadow-xl flex flex-col z-0'}`}
+              className={`relative bg-white dark:bg-slate-900 rounded-3xl p-6 border ${plan.popular ? 'border-violet-500 ring-2 ring-violet-500/10 shadow-cl md:-translate-y-2 flex flex-col z-10' : 'border-gray-200 dark:border-slate-800 shadow-md flex flex-col z-0'}`}
             >
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-linear-to-r from-violet-600 to-indigo-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg">
