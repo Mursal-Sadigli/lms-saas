@@ -35,7 +35,8 @@ import {
   getPlatformSettings,
   updatePlatformSettings,
   approveCourse,
-  fetchAdminVisitors
+  fetchAdminVisitors,
+  clearAdminVisitors
 } from '../src/api'
 
 export default function SuperAdminPanel() {
@@ -50,7 +51,7 @@ export default function SuperAdminPanel() {
   const [settings, setSettings] = useState(null)
   const [visitorsList, setVisitorsList] = useState([])
   
-  const [activeTab, setActiveTab] = useState('dashboard')
+  const [activeTab, setActiveTab] = useState(() => localStorage.getItem('adminMainTab') || 'dashboard')
   const [settingsTab, setSettingsTab] = useState('general')
   const [loading, setLoading] = useState(true)
   const [savingSettings, setSavingSettings] = useState(false)
@@ -93,6 +94,11 @@ export default function SuperAdminPanel() {
     }
     fetchData()
   }, [isSignedIn, navigate])
+
+  // Aktiv tabı yadda saxlamaq üçün
+  useEffect(() => {
+    localStorage.setItem('adminMainTab', activeTab)
+  }, [activeTab])
 
   if (!isLoaded) return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -162,6 +168,18 @@ export default function SuperAdminPanel() {
       toast.error('Tənzimləmələri yadda saxlamaq mümkün olmadı', { style: { background: '#333', color: '#fff' } })
     } finally {
       setSavingSettings(false)
+    }
+  }
+
+  const handleClearAllVisitors = async () => {
+    if (!window.confirm('Bütün ziyarətçi tarixçəsini silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarıla bilməz.')) return
+    try {
+      const token = await getToken()
+      await clearAdminVisitors(token)
+      setVisitorsList([])
+      toast.success('Bütün ziyarətçilər uğurla silindi', { style: { background: '#333', color: '#fff' } })
+    } catch (err) {
+      toast.error('Silinmə xətası baş verdi', { style: { background: '#333', color: '#fff' } })
     }
   }
 
@@ -485,8 +503,18 @@ export default function SuperAdminPanel() {
                     </h3>
                     <p className="text-sm text-gray-500 mt-1">Sistem yaddaşında qalan son 500 ziyarət sessiyası.</p>
                   </div>
-                  <div className="bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 shadow-sm">
-                    <Activity size={16} /> Total: {visitorsList.length}
+                  <div className="flex items-center gap-3">
+                    <div className="bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 shadow-sm border border-violet-100 dark:border-violet-900/30">
+                      <Activity size={16} /> Total: {visitorsList.length}
+                    </div>
+                    {visitorsList.length > 0 && (
+                      <button 
+                        onClick={handleClearAllVisitors} 
+                        className="flex items-center gap-2 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 px-4 py-2 rounded-xl text-sm font-bold border border-red-100 dark:border-red-900/30 transition-colors cursor-pointer"
+                      >
+                        <Trash2 size={16} /> Təmizlə
+                      </button>
+                    )}
                   </div>
                 </div>
                 <div className="overflow-x-auto max-h-[60vh]">

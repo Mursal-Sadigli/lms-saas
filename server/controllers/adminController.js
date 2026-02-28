@@ -135,6 +135,16 @@ const getVisitorLogs = async (req, res) => {
   }
 }
 
+// 8. Ziyarətçi Loqlarını Təmizləmək
+const clearVisitorLogs = async (req, res) => {
+  try {
+    await sql`DELETE FROM visitors_log`
+    res.json({ success: true, message: 'Bütün ziyarətçilər cədvəldən təmizləndi' })
+  } catch (error) {
+    res.status(500).json({ error: 'Visitor logs clear xətası: ' + error.message })
+  }
+}
+
 module.exports = {
   getAdminStats,
   getAllUsers,
@@ -142,5 +152,6 @@ module.exports = {
   changeUserRole,
   adminDeleteCourse,
   approveCourse,
-  getVisitorLogs
+  getVisitorLogs,
+  clearVisitorLogs
 }

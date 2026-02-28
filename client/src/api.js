@@ -156,3 +156,8 @@ export const fetchAdminVisitors = async (token) => {
   const res = await api.get('/admin/visitors', { headers: { Authorization: `Bearer ${token}` } })
   return res.data
 }
+
+export const clearAdminVisitors = async (token) => {
+  const res = await api.delete('/admin/visitors', { headers: { Authorization: `Bearer ${token}` } })
+  return res.data
+}
