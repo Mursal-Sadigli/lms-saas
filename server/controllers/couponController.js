@@ -4,7 +4,7 @@ const createCoupon = async (req, res) => {
   const sql = neon(process.env.DATABASE_URL);
   try {
     const { code, discount_percent, course_id, max_uses, expires_at } = req.body;
-    const educator_id = req.user.id;
+    const educator_id = req.auth.userId;
 
     if (!code || !discount_percent) {
         return res.status(400).json({ success: false, message: 'Kod və endirim faizi mütləqdir' });
@@ -29,7 +29,7 @@ const createCoupon = async (req, res) => {
 const getEducatorCoupons = async (req, res) => {
   const sql = neon(process.env.DATABASE_URL);
   try {
-    const educator_id = req.user.id;
+    const educator_id = req.auth.userId;
     const coupons = await sql`SELECT * FROM coupons WHERE educator_id = ${educator_id} ORDER BY created_at DESC`;
     res.json({ success: true, coupons });
   } catch (err) {
@@ -80,7 +80,7 @@ const deleteCoupon = async (req, res) => {
   const sql = neon(process.env.DATABASE_URL);
   try {
     const { id } = req.params;
-    const educator_id = req.user.id;
+    const educator_id = req.auth.userId;
     
     await sql`DELETE FROM coupons WHERE id = ${id} AND educator_id = ${educator_id}`;
     res.json({ success: true, message: 'Kupon silindi' });
