@@ -75,7 +75,23 @@ export default function Navbar() {
               <span className="font-bold text-[10px] md:text-xs text-gray-500 dark:text-gray-400 uppercase tracking-tighter">Academy</span>
             </div>
           </div>
-          <img src="/logo.jpg" alt="ACE Academy Logo" className="h-14 md:h-20 w-auto object-contain transition-transform group-hover:scale-105" />
+          {/* Light Mode Logo */}
+          <img 
+            src="/logo.jpg" 
+            alt="ACE Academy Logo" 
+            className="h-14 md:h-18 w-auto object-contain transition-transform group-hover:scale-105 dark:hidden" 
+          />
+          {/* Dark Mode Logo */}
+          <img 
+            src="/logo_dark.png" 
+            alt="ACE Academy Logo" 
+            className="h-14 md:h-18 w-auto object-contain transition-transform group-hover:scale-105 hidden dark:block" 
+            style={{ 
+              maskImage: 'radial-gradient(circle at center, black 40%, transparent 100%)',
+              WebkitMaskImage: 'radial-gradient(circle at center, black 40%, transparent 100%)',
+              filter: 'brightness(1.1)'
+            }}
+          />
         </Link>
 
         <div className="hidden md:flex items-center space-x-2">

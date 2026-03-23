@@ -397,7 +397,16 @@ export default function Home() {
                     <span className="font-bold text-xs text-gray-400 uppercase tracking-tighter">Academy</span>
                   </div>
                 </div>
-                <img src="/logo.jpg" alt="ACE Academy Logo" className="h-20 md:h-28 w-auto object-contain" />
+                <img 
+                  src="/logo_dark.png" 
+                  alt="ACE Academy Logo" 
+                  className="h-24 md:h-32 w-auto object-contain" 
+                  style={{ 
+                    filter: 'brightness(1.15) contrast(1.1)',
+                    maskImage: 'radial-gradient(circle at center, black 40%, transparent 100%)',
+                    WebkitMaskImage: 'radial-gradient(circle at center, black 40%, transparent 100%)'
+                  }}
+                />
               </div>
               <p className="text-gray-400 text-sm leading-relaxed mb-5">
                 Azərbaycanda keyfiyyətli online təhsil platforması. Peşəkar müəllimlərdən öyrən.
