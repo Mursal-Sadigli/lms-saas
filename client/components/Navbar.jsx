@@ -69,10 +69,10 @@ export default function Navbar() {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 md:gap-4 group no-underline">
           <div className="flex flex-col leading-none">
-            <span className="font-bold text-[8px] md:text-[10px] text-violet-600 dark:text-violet-400 tracking-[0.3em] uppercase mb-1">İnformatika</span>
+            <span className="font-bold text-[7px] md:text-[9px] text-violet-600 dark:text-violet-400 tracking-[0.25em] uppercase mb-0.5">İnformatika</span>
             <div className="flex items-baseline gap-1">
-              <span className="font-black text-xl md:text-3xl text-gray-900 dark:text-white tracking-tighter uppercase">ACE</span>
-              <span className="font-bold text-[10px] md:text-xs text-gray-500 dark:text-gray-400 uppercase tracking-tighter">Academy</span>
+              <span className="font-black text-lg md:text-2xl text-gray-900 dark:text-white tracking-tighter uppercase">ACE</span>
+              <span className="font-bold text-[9px] md:text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-tight">Academy</span>
             </div>
           </div>
           {/* Light Mode Logo */}

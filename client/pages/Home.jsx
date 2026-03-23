@@ -171,11 +171,10 @@ export default function Home() {
           <div className="inline-flex items-center gap-1.5 bg-white/20 text-white text-xs font-semibold px-4 py-1.5 rounded-full mb-5">
             <Sparkles size={13} /> Azərbaycanda #1 Online Təhsil Platforması
           </div>
-            <h1 className="text-4xl sm:text-6xl font-black text-white leading-tight mb-6">
-              İnformatikanı bizimlə <br />
-              <span className="text-yellow-300">peşəkar öyrən</span> 🎓
+            <h1 className="text-3xl sm:text-5xl font-black text-white leading-tight mb-6">
+              İnformatikanı bizimlə <span className="text-yellow-300">peşəkar öyrən</span> 🎓
             </h1>
-            <p className="text-white/90 text-lg sm:text-xl mb-10 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-white/90 text-base sm:text-lg mb-10 max-w-2xl mx-auto leading-relaxed">
               Magistratura, sınaqlar və ətraflı dərs izahları. Tacir Hüseynov ilə informatika dünyasına addım atın.
             </p>
           <div className="flex items-center bg-white dark:bg-slate-900 border dark:border-slate-700 rounded-2xl pl-4 sm:pl-5 pr-1.5 py-1.5 shadow-2xl max-w-xl mx-auto gap-2 transition-colors">
