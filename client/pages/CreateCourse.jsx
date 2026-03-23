@@ -5,7 +5,7 @@ import { useAuth } from '@clerk/clerk-react'
 import toast from 'react-hot-toast'
 import { createCourse } from '../src/api'
 
-const categories = ['Frontend', 'Backend', 'Data Science', 'Design', 'Mobile', 'DevOps', 'Digər']
+const categories = ['Dərs izahları', 'Sınaq izahları', 'Sınaq PDF-ləri', 'Dərs PDF-ləri', 'Digər']
 
 export default function CreateCourse() {
   const navigate = useNavigate()

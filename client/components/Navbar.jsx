@@ -67,8 +67,15 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-20 md:h-24 flex items-center justify-between">
 
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
-          <img src="/logo.jpg" alt="ACE Academy Logo" className="h-16 md:h-20 w-auto object-contain" />
+        <Link to="/" className="flex items-center gap-2.5 md:gap-4 group no-underline">
+          <div className="flex flex-col leading-none">
+            <span className="font-bold text-[8px] md:text-[10px] text-violet-600 dark:text-violet-400 tracking-[0.3em] uppercase mb-1">İnformatika</span>
+            <div className="flex items-baseline gap-1">
+              <span className="font-black text-xl md:text-3xl text-gray-900 dark:text-white tracking-tighter uppercase">ACE</span>
+              <span className="font-bold text-[10px] md:text-xs text-gray-500 dark:text-gray-400 uppercase tracking-tighter">Academy</span>
+            </div>
+          </div>
+          <img src="/logo.jpg" alt="ACE Academy Logo" className="h-14 md:h-20 w-auto object-contain transition-transform group-hover:scale-105" />
         </Link>
 
         <div className="hidden md:flex items-center space-x-2">

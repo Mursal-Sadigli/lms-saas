@@ -11,51 +11,51 @@ import { useAuth } from '@clerk/clerk-react'
 export const allCourses = [
   {
     _id: '1',
-    title: 'React.js — Sıfırdan Peşəkar Səviyyəyə',
-    description: 'React hooks, context, routing, state management — hamısını öyrən.',
+    title: 'İnformatika — Sıfırdan Peşəkar Səviyyəyə (Magistratura)',
+    description: 'Bütün mövzular, alqoritmlər, proqramlaşdırma əsasları.',
     price: 24.99,
-    thumbnail: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&q=80',
-    educator: { name: 'Elnur Məmmədov' },
-    category: 'Frontend',
+    thumbnail: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&q=80',
+    educator: { name: 'Mürsəl Sadıqlı' },
+    category: 'Dərs izahları',
     rating: 4.8,
     students: 1240,
     duration: '18 saat',
   },
   {
     _id: '2',
-    title: 'Node.js & Express — Backend Development',
-    description: 'REST API, MongoDB, authentication — tam backend kurs.',
-    price: 29.99,
-    thumbnail: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=400&q=80',
-    educator: { name: 'Anar Əliyev' },
-    category: 'Backend',
+    title: 'Sınaq Toplusu — I Bölmə',
+    description: 'Qəbul tipli sınaqlar və ətraflı video izahlar.',
+    price: 9.99,
+    thumbnail: 'https://images.unsplash.com/photo-1606326666333-e70a2550e588?w=400&q=80',
+    educator: { name: 'Mürsəl Sadıqlı' },
+    category: 'Sınaq izahları',
     rating: 4.7,
     students: 890,
-    duration: '22 saat',
+    duration: '5 saat',
   },
   {
     _id: '3',
-    title: 'Python — Məlumat Elmi və AI',
-    description: 'Machine learning, pandas, numpy — süni intellekt əsasları.',
-    price: 34.99,
-    thumbnail: 'https://images.unsplash.com/photo-1526379879527-8559ecfcaec0?w=400&q=80',
-    educator: { name: 'Leyla Hüseynova' },
-    category: 'Data Science',
+    title: 'Model Sınaqlar (PDF)',
+    description: 'Yüklənə bilən sınaq materialları siyahısı.',
+    price: 4.99,
+    thumbnail: 'https://images.unsplash.com/photo-1568667256549-094345857637?w=400&q=80',
+    educator: { name: 'Mürsəl Sadıqlı' },
+    category: 'Sınaq PDF-ləri',
     rating: 4.9,
     students: 2100,
-    duration: '30 saat',
+    duration: 'PDF',
   },
   {
     _id: '4',
-    title: 'UI/UX Design — Figma ilə',
-    description: 'Müasir dizayn prinsipləri, prototiplər, istifadəçi təcrübəsi.',
-    price: 19.99,
-    thumbnail: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&q=80',
-    educator: { name: 'Nigar Quliyeva' },
-    category: 'Design',
+    title: 'Dərs Qeydləri — Tam Paket',
+    description: 'Bütün mövzuların qısa və lakonik PDF konspektləri.',
+    price: 14.99,
+    thumbnail: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&q=80',
+    educator: { name: 'Mürsəl Sadıqlı' },
+    category: 'Dərs PDF-ləri',
     rating: 4.6,
     students: 680,
-    duration: '14 saat',
+    duration: 'PDF',
   },
   {
     _id: '5',
@@ -83,7 +83,7 @@ export const allCourses = [
   },
 ]
 
-const categories = ['Hamısı', 'Frontend', 'Backend', 'Data Science', 'Design', 'Mobile', 'DevOps']
+const categories = ['Hamısı', 'Dərs izahları', 'Sınaq izahları', 'Sınaq PDF-ləri', 'Dərs PDF-ləri']
 
 // Mock fallback data (server bağlı olmadıqda)
 const mockCourses = allCourses
@@ -389,7 +389,14 @@ export default function Home() {
 
             {/* Brand + Social */}
             <div>
-              <div className="flex items-center gap-2.5 mb-4">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="flex flex-col leading-none">
+                  <span className="font-bold text-[10px] text-violet-400 tracking-[0.3em] uppercase mb-1">İnformatika</span>
+                  <div className="flex items-baseline gap-1">
+                    <span className="font-black text-2xl text-white tracking-tighter uppercase">ACE</span>
+                    <span className="font-bold text-xs text-gray-400 uppercase tracking-tighter">Academy</span>
+                  </div>
+                </div>
                 <img src="/logo.jpg" alt="ACE Academy Logo" className="h-20 md:h-28 w-auto object-contain" />
               </div>
               <p className="text-gray-400 text-sm leading-relaxed mb-5">
