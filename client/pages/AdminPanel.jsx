@@ -89,9 +89,13 @@ export default function AdminPanel() {
         <div className="flex flex-col gap-4">
           {courses.map(course => (
             <div key={course.id} className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 transition-colors">
-              {course.thumbnail && (
-                <img src={course.thumbnail} alt="" className="w-full sm:w-20 h-32 sm:h-14 rounded-xl object-cover shrink-0 border border-gray-100 dark:border-slate-800" />
-              )}
+              <div className="w-full sm:w-20 h-32 sm:h-14 rounded-xl bg-gray-100 dark:bg-slate-800 flex items-center justify-center shrink-0 border border-gray-100 dark:border-slate-800 overflow-hidden">
+                {course.thumbnail ? (
+                  <img src={course.thumbnail} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <BookOpen size={20} className="text-gray-400" />
+                )}
+              </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-sm font-bold text-gray-900 dark:text-white truncate mb-1">{course.title}</h3>
                 <div className="flex items-center gap-1.5">

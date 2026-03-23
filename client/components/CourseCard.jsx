@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Star, Clock, Users, ChevronRight, Heart } from 'lucide-react'
+import { Star, Clock, Users, ChevronRight, Heart, BookOpen } from 'lucide-react'
 import { useAuth } from '@clerk/clerk-react'
 import { toggleWishlist } from '../src/api'
 import toast from 'react-hot-toast'
@@ -59,12 +59,16 @@ export default function CourseCard({ course }) {
       <div className="relative bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-gray-200 dark:border-slate-800 transition-all duration-300 cursor-pointer group-hover:-translate-y-1 group-hover:shadow-xl group-hover:shadow-violet-100/50 dark:group-hover:shadow-violet-900/20 group-hover:border-violet-400 dark:group-hover:border-violet-500">
 
         {/* Thumbnail */}
-        <div className="relative h-44 overflow-hidden">
-          <img
-            src={thumbnail}
-            alt={title}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
+        <div className="relative h-44 overflow-hidden bg-gray-100 dark:bg-slate-800 flex items-center justify-center">
+          {thumbnail ? (
+            <img
+              src={thumbnail}
+              alt={title}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          ) : (
+            <BookOpen size={48} className="text-gray-200 dark:text-slate-700" />
+          )}
           <span className="absolute top-3 left-3 bg-violet-600 dark:bg-violet-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-sm z-10">
             {category}
           </span>

@@ -1,6 +1,7 @@
 require('dotenv').config()
 const express = require('express') // server starting
 const cors = require('cors')
+const path = require('path')
 
 const app = express()
 const PORT = process.env.PORT || 5000
@@ -35,6 +36,10 @@ app.use('/api/contact', require('./routes/contactRoutes'))
 app.use('/api/public', require('./routes/publicRoutes'))
 app.use('/api/gamification', require('./routes/gamificationRoutes'))
 app.use('/api/certificates', require('./routes/certificateRoutes'))
+app.use('/api/upload', require('./routes/uploadRoutes'))
+
+// ── Static Files ─────────────────────────────
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')))
 
 // ── Health check ────────────────────────────
 app.get('/api/health', async (req, res) => {

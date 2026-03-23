@@ -153,35 +153,47 @@ export default function LearnPage() {
         {/* === Video Player (sol/üst) === */}
         <div className="flex-1 flex flex-col min-w-0">
 
-          {/* YouTube Player */}
+          {/* Player Container */}
           <div className="relative bg-black w-full" style={{ paddingTop: '56.25%' }}>
             {activeVideo ? (
-              <iframe
-                key={activeVideo.id}
-                src={(() => {
-                  try {
-                    const u = activeVideo.video_url;
-                    if (!u) return '';
-                    let vid = '';
-                    const parsed = new URL(u);
-                    if (u.includes('youtu.be/')) vid = parsed.pathname.slice(1);
-                    else if (u.includes('youtube.com/watch')) vid = parsed.searchParams.get('v');
-                    else if (u.includes('youtube.com/embed/')) vid = parsed.pathname.split('embed/')[1];
-                    else return u;
+              activeVideo.video_file_url ? (
+                <video
+                  key={activeVideo.video_file_url}
+                  src={activeVideo.video_file_url}
+                  controls
+                  autoPlay
+                  className="absolute inset-0 w-full h-full object-contain bg-black"
+                  controlsList="nodownload"
+                  onContextMenu={e => e.preventDefault()}
+                />
+              ) : (
+                <iframe
+                  key={activeVideo.id}
+                  src={(() => {
+                    try {
+                      const u = activeVideo.video_url;
+                      if (!u) return '';
+                      let vid = '';
+                      const parsed = new URL(u);
+                      if (u.includes('youtu.be/')) vid = parsed.pathname.slice(1);
+                      else if (u.includes('youtube.com/watch')) vid = parsed.searchParams.get('v');
+                      else if (u.includes('youtube.com/embed/')) vid = parsed.pathname.split('embed/')[1];
+                      else return u;
 
-                    let params = '?autoplay=1&rel=0&modestbranding=1&enablejsapi=1';
-                    if (parsed.searchParams.has('start')) params += `&start=${parsed.searchParams.get('start')}`;
-                    if (parsed.searchParams.has('end')) params += `&end=${parsed.searchParams.get('end')}`;
-                    return `https://www.youtube.com/embed/${vid}${params}`;
-                  } catch (e) {
-                    return activeVideo.video_url; // fallback
-                  }
-                })()}
-                className="absolute inset-0 w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                title={activeVideo.title}
-              />
+                      let params = '?autoplay=1&rel=0&modestbranding=1&enablejsapi=1';
+                      if (parsed.searchParams.has('start')) params += `&start=${parsed.searchParams.get('start')}`;
+                      if (parsed.searchParams.has('end')) params += `&end=${parsed.searchParams.get('end')}`;
+                      return `https://www.youtube.com/embed/${vid}${params}`;
+                    } catch (e) {
+                      return activeVideo.video_url; // fallback
+                    }
+                  })()}
+                  className="absolute inset-0 w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  title={activeVideo.title}
+                />
+              )
             ) : (
               <div className="absolute inset-0 flex items-center justify-center text-gray-600">
                 <Play size={48} />
@@ -209,8 +221,27 @@ export default function LearnPage() {
                 {activeVideo.description && (
                   <p className="text-gray-400 text-sm leading-relaxed">{activeVideo.description}</p>
                 )}
-                <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
-                  <Clock size={13} /> {activeVideo.duration}
+                <div className="flex flex-wrap items-center gap-3 mt-4">
+                  {activeVideo.pdf_url && (
+                    <a 
+                      href={activeVideo.pdf_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 px-4 py-2 rounded-lg text-xs font-bold transition-all no-underline border border-amber-500/30"
+                    >
+                      <FileText size={14} /> Dərs Materialı (PDF)
+                    </a>
+                  )}
+                  {course.pdf_url && (
+                    <a 
+                      href={course.pdf_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 px-4 py-2 rounded-lg text-xs font-bold transition-all no-underline border border-blue-500/30"
+                    >
+                      <FileText size={14} /> Kursun Ümumi Materialı
+                    </a>
+                  )}
                 </div>
               </div>
 

@@ -106,9 +106,13 @@ export default function StudentDashboard() {
                 {enrollments.map(e => (
                   <div key={e.id} className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-5 transition-colors">
                     <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                      {e.thumbnail && (
-                        <img src={e.thumbnail} alt="" className="w-full sm:w-20 h-32 sm:h-14 rounded-xl object-cover shrink-0" />
-                      )}
+                      <div className="w-full sm:w-20 h-32 sm:h-14 rounded-xl bg-gray-100 dark:bg-slate-800 flex items-center justify-center shrink-0 border border-gray-100 dark:border-slate-800 overflow-hidden">
+                        {e.thumbnail ? (
+                          <img src={e.thumbnail} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <BookOpen size={20} className="text-gray-400" />
+                        )}
+                      </div>
                       <div className="flex-1 min-w-0 flex flex-col justify-center">
                         <h3 className="font-bold text-gray-900 dark:text-white text-sm truncate mb-0.5">{e.title}</h3>
                         <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">{e.educator_name}</p>

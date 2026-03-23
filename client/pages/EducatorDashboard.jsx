@@ -191,7 +191,13 @@ export default function EducatorDashboard() {
           ) : (
              courses.map(course => (
               <div key={course.id} className={`bg-white dark:bg-slate-900 rounded-2xl border transition-colors ${course.is_published ? 'border-gray-200 dark:border-slate-800' : 'border-amber-300 dark:border-amber-700/50 bg-amber-50/30 dark:bg-amber-900/10'} p-5 flex flex-col md:flex-row items-start md:items-center gap-5`}>
-                <img src={course.thumbnail} alt="" className="w-full md:w-28 h-20 rounded-xl object-cover shrink-0 border border-gray-100 dark:border-slate-800" />
+                {course.thumbnail ? (
+                  <img src={course.thumbnail} alt="" className="w-full md:w-28 h-20 rounded-xl object-cover shrink-0 border border-gray-100 dark:border-slate-800" />
+                ) : (
+                  <div className="w-full md:w-28 h-20 rounded-xl bg-gray-100 dark:bg-slate-800 flex items-center justify-center shrink-0 border border-gray-200 dark:border-slate-800 text-gray-400">
+                    <BookOpen size={24} />
+                  </div>
+                )}
                 <div className="flex-1 min-w-40">
                   <div className="flex items-center gap-2 mb-1.5">
                     <h3 className="text-base font-bold text-gray-900 dark:text-white">{course.title}</h3>

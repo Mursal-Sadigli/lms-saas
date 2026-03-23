@@ -22,7 +22,10 @@ import {
   CheckCircle,
   Eye,
   Menu,
-  X
+  X,
+  FileText,
+  Video,
+  Edit
 } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import toast from 'react-hot-toast'
@@ -462,15 +465,38 @@ export default function SuperAdminPanel() {
                     
                     <div className="p-6 flex-1 flex flex-col">
                       <h3 className="flex-1 font-extrabold text-gray-900 dark:text-white text-lg leading-tight mb-2 line-clamp-2">{c.title}</h3>
-                      <div className="flex items-center gap-2 mb-6 text-gray-500 dark:text-gray-400">
-                        <Users size={14} />
-                        <span className="text-xs font-bold">{c.educator_name || 'Bilinməyən Müəllim'}</span>
+                      <div className="flex items-center gap-4 mt-auto mb-4">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-gray-500">
+                          <Users size={14} /> {c.students || 0}
+                        </div>
+                        {c.pdf_url && (
+                          <div className="flex items-center gap-1.5 text-xs font-bold text-red-500" title="Kurs materialı (PDF)">
+                             <FileText size={14} /> PDF
+                          </div>
+                        )}
+                        {Number(c.video_file_count) > 0 && (
+                          <div className="flex items-center gap-1.5 text-xs font-bold text-violet-500" title={`${c.video_file_count} Video Fayl`}>
+                             <Video size={14} /> {c.video_file_count} Video
+                          </div>
+                        )}
+                         {Number(c.video_pdf_count) > 0 && (
+                          <div className="flex items-center gap-1.5 text-xs font-bold text-orange-500" title={`${c.video_pdf_count} Dərs PDF-i`}>
+                             <FileText size={14} /> {c.video_pdf_count} PDF
+                          </div>
+                        )}
                       </div>
                       
                       <div className="mt-auto flex justify-between items-center pt-5 border-t border-gray-100 dark:border-slate-800/60">
                         <span className="text-lg font-extrabold text-violet-600 dark:text-violet-400">{Number(c.price).toFixed(2)} ₼</span>
                         <div className="flex gap-2">
-                          {!c.is_published && (
+                          {c.is_published ? (
+                            <button 
+                              onClick={() => navigate(`/educator/edit/${c.id}`)}
+                              className="flex items-center gap-2 text-xs font-extrabold text-blue-600 dark:text-blue-400 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 px-3 py-2 rounded-xl transition-colors cursor-pointer border-0"
+                            >
+                              <Edit size={16} /> Redaktə
+                            </button>
+                          ) : (
                             <button 
                               onClick={() => handleApproveCourse(c.id)}
                               className="flex items-center gap-2 text-xs font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 px-3 py-2 rounded-xl transition-colors cursor-pointer border-0"

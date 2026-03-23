@@ -200,3 +200,11 @@ export const getCertificateById = async (id) => {
   const res = await api.get(`/certificates/verify/${id}`)
   return res.data.certificate
 }
+
+export const uploadFile = (token, file) => {
+  const formData = new FormData()
+  formData.append('file', file)
+  return authApi(token).post('/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }).then(r => r.data)
+}

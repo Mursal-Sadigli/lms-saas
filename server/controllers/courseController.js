@@ -75,12 +75,12 @@ const getCourseById = async (req, res) => {
 
 // POST /api/courses — yeni kurs yarat (educator)
 const createCourse = async (req, res) => {
-  const { title, description, price, thumbnail, category, videos } = req.body
+  const { title, description, price, thumbnail, category, videos, pdf_url } = req.body
   const educatorId = req.auth.userId
 
   const [course] = await sql`
-    INSERT INTO courses (title, description, price, thumbnail, category, educator_id, is_published)
-    VALUES (${title}, ${description}, ${price}, ${thumbnail}, ${category}, ${educatorId}, false)
+    INSERT INTO courses (title, description, price, thumbnail, category, educator_id, is_published, pdf_url)
+    VALUES (${title}, ${description}, ${price}, ${thumbnail}, ${category}, ${educatorId}, false, ${pdf_url || null})
     RETURNING *
   `
 
@@ -88,8 +88,8 @@ const createCourse = async (req, res) => {
     for (let i = 0; i < videos.length; i++) {
       const v = videos[i]
       await sql`
-        INSERT INTO course_videos (course_id, title, video_url, position, is_free, description, quiz)
-        VALUES (${course.id}, ${v.title}, ${v.videoUrl}, ${i + 1}, ${v.isFree || false}, ${v.description || ''}, ${v.quiz ? JSON.stringify(v.quiz) : null})
+        INSERT INTO course_videos (course_id, title, video_url, position, is_free, description, quiz, pdf_url, video_file_url)
+        VALUES (${course.id}, ${v.title}, ${v.videoUrl || null}, ${i + 1}, ${v.isFree || false}, ${v.description || ''}, ${v.quiz ? JSON.stringify(v.quiz) : null}, ${v.pdf_url || null}, ${v.video_file_url || null})
       `
     }
   }
@@ -143,14 +143,16 @@ const getEducatorCourses = async (req, res) => {
 // PUT /api/courses/:id — kursu güncəllə
 const updateCourse = async (req, res) => {
   const { id } = req.params;
-  const { title, description, price, thumbnail, category, videos } = req.body;
+  const { title, description, price, thumbnail, category, videos, pdf_url } = req.body;
   const educatorId = req.auth.userId;
+  const isAdmin = req.auth.sessionClaims?.metadata?.role === 'admin' || req.auth.sessionClaims?.role === 'admin';
+  // Clerk specific check or just use req.auth
 
   try {
     const [course] = await sql`
       UPDATE courses 
-      SET title = ${title}, description = ${description}, price = ${price}, thumbnail = ${thumbnail}, category = ${category}, updated_at = NOW()
-      WHERE id = ${id} AND educator_id = ${educatorId}
+      SET title = ${title}, description = ${description}, price = ${price}, thumbnail = ${thumbnail}, category = ${category}, pdf_url = ${pdf_url || null}, updated_at = NOW()
+      WHERE id = ${id} ${isAdmin ? sql`` : sql`AND educator_id = ${educatorId}`}
       RETURNING *
     `;
     
@@ -163,8 +165,8 @@ const updateCourse = async (req, res) => {
       for (let i = 0; i < videos.length; i++) {
         const v = videos[i];
         await sql`
-          INSERT INTO course_videos (course_id, title, video_url, position, is_free, description, quiz)
-          VALUES (${course.id}, ${v.title}, ${v.videoUrl}, ${i + 1}, ${v.isFree || false}, ${v.description || ''}, ${v.quiz ? JSON.stringify(v.quiz) : null})
+          INSERT INTO course_videos (course_id, title, video_url, position, is_free, description, quiz, pdf_url, video_file_url)
+          VALUES (${course.id}, ${v.title}, ${v.videoUrl || null}, ${i + 1}, ${v.isFree || false}, ${v.description || ''}, ${v.quiz ? JSON.stringify(v.quiz) : null}, ${v.pdf_url || null}, ${v.video_file_url || null})
         `;
       }
     }

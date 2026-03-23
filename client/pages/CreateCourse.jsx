@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { PlusCircle, Trash2, Video, ImagePlus, BookOpen, DollarSign, FileText, Wand2, X } from 'lucide-react'
 import { useAuth } from '@clerk/clerk-react'
 import toast from 'react-hot-toast'
-import { createCourse } from '../src/api'
+import { createCourse, uploadFile } from '../src/api' // Updated
+import { FileUp, FileCheck, Loader2 } from 'lucide-react' // Added icons
 
 const categories = ['Dərs izahları', 'Sınaq izahları', 'Sınaq PDF-ləri', 'Dərs PDF-ləri', 'Digər']
 
@@ -18,11 +19,13 @@ export default function CreateCourse() {
     title: '',
     description: '',
     price: '',
-    category: 'Frontend',
+    category: 'Informatika dərs izahları',
     thumbnail: '',
+    pdf_url: '', // New
   })
 
-  const [videos, setVideos] = useState([{ title: '', videoUrl: '', quiz: null }])
+  const [videos, setVideos] = useState([{ title: '', videoUrl: '', video_file_url: '', pdf_url: '', quiz: null }])
+  const [uploading, setUploading] = useState({ type: null, index: null }) // New for progress/state
   const [step, setStep] = useState(1)
 
   const handleFormChange = e => {
@@ -33,8 +36,36 @@ export default function CreateCourse() {
     setVideos(vs => vs.map((v, idx) => idx === i ? { ...v, [field]: value } : v))
   }
 
-  const addVideo = () => setVideos(vs => [...vs, { title: '', videoUrl: '', quiz: null }])
+  const addVideo = () => setVideos(vs => [...vs, { title: '', videoUrl: '', video_file_url: '', pdf_url: '', quiz: null }])
   const removeVideo = i => setVideos(vs => vs.filter((_, idx) => idx !== i))
+
+  const handleFileUpload = async (e, type, index = null) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    try {
+      setUploading({ type, index })
+      const token = await getToken()
+      const result = await uploadFile(token, file)
+      
+      if (type === 'thumbnail') {
+        setForm(prev => ({ ...prev, thumbnail: result.url }))
+      } else if (type === 'coursePdf') {
+        setForm(prev => ({ ...prev, pdf_url: result.url }))
+      } else if (type === 'lessonVideo') {
+        handleVideoChange(index, 'video_file_url', result.url)
+      } else if (type === 'lessonPdf') {
+        handleVideoChange(index, 'pdf_url', result.url)
+      }
+      
+      toast.success('Fayl uğurla yükləndi')
+    } catch (err) {
+      console.error(err)
+      toast.error('Gözlənilməz xəta: ' + (err.response?.data?.error || err.message))
+    } finally {
+      setUploading({ type: null, index: null })
+    }
+  }
 
   const handleQuizChange = (i, field, value) => {
     setVideos(vs => vs.map((v, idx) => {
@@ -219,22 +250,71 @@ export default function CreateCourse() {
               </Field>
             </div>
 
-            <Field label="Thumbnail URL" icon={<ImagePlus size={15} />}>
-              <input
-                name="thumbnail"
-                value={form.thumbnail}
-                onChange={handleFormChange}
-                placeholder="https://images.unsplash.com/..."
-                className={inputCls}
-              />
-              {form.thumbnail && (
-                <img
-                  src={form.thumbnail}
-                  alt="preview"
-                  className="w-full h-44 object-cover rounded-xl mt-3"
-                />
-              )}
-            </Field>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Kurs Şəkli (Thumbnail)
+                </label>
+                <div className="flex items-center gap-4">
+                  <label className="flex-1 cursor-pointer">
+                    <div className="border-2 border-dashed border-gray-300 dark:border-slate-700 rounded-xl p-4 hover:border-violet-500 dark:hover:border-violet-400 transition-colors text-center bg-gray-50 dark:bg-slate-800/50">
+                      {uploading.type === 'thumbnail' ? (
+                        <div className="flex items-center justify-center gap-2 text-violet-600">
+                          <Loader2 className="animate-spin" size={20} />
+                          <span className="text-sm font-medium">Yüklənir...</span>
+                        </div>
+                      ) : form.thumbnail ? (
+                        <div className="flex flex-col items-center gap-2">
+                          <img src={form.thumbnail} alt="preview" className="w-full h-32 object-cover rounded-lg mb-2" />
+                          <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                            <FileCheck size={20} />
+                            <span className="text-sm font-medium">Yükləndi!</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-1 text-gray-500">
+                          <ImagePlus size={24} />
+                          <span className="text-xs font-medium">Şəkil seçin</span>
+                        </div>
+                      )}
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'thumbnail')} />
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Kursun Ümumi Materialı (PDF)
+                </label>
+                <label className="cursor-pointer block">
+                  <div className="border-2 border-dashed border-gray-300 dark:border-slate-700 rounded-xl p-4 hover:border-violet-500 dark:hover:border-violet-400 transition-colors text-center bg-gray-50 dark:bg-slate-800/50">
+                    {uploading.type === 'coursePdf' ? (
+                      <div className="flex items-center justify-center gap-2 text-violet-600">
+                        <Loader2 className="animate-spin" size={20} />
+                        <span className="text-sm font-medium">Yüklənir...</span>
+                      </div>
+                    ) : form.pdf_url ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="bg-amber-100 dark:bg-amber-900/30 p-4 rounded-lg text-amber-600">
+                           <FileText size={40} />
+                        </div>
+                        <div className="flex items-center justify-center gap-2 text-green-600 dark:text-green-400">
+                          <FileCheck size={20} />
+                          <span className="text-sm font-medium truncate max-w-[150px]">PDF Hazırdır!</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-1 text-gray-500">
+                        <FileUp size={24} />
+                        <span className="text-xs font-medium">PDF seçin (Opsional)</span>
+                      </div>
+                    )}
+                    <input type="file" accept="application/pdf" className="hidden" onChange={(e) => handleFileUpload(e, 'coursePdf')} />
+                  </div>
+                </label>
+              </div>
+            </div>
 
             <div className="flex justify-end mt-6">
               <button
@@ -323,17 +403,64 @@ export default function CreateCourse() {
                 <input
                   value={video.title}
                   onChange={e => handleVideoChange(i, 'title', e.target.value)}
-                  placeholder="Video başlığı"
+                  placeholder="Dərs başlığı"
                   required
-                  className={`${inputCls} mb-3`}
+                  className={`${inputCls} mb-4`}
                 />
-                <input
-                  value={video.videoUrl}
-                  onChange={e => handleVideoChange(i, 'videoUrl', e.target.value)}
-                  placeholder="Video URL (YouTube, Vimeo, və s.)"
-                  required
-                  className={inputCls}
-                />
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Video Upload Section */}
+                  <div>
+                    <label className="block text-[11px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-500 mb-2">Video Faylı</label>
+                    <label className="cursor-pointer block">
+                      <div className={`border-2 border-dashed rounded-xl p-4 transition-all text-center ${video.video_file_url ? 'border-green-400 bg-green-50 dark:bg-green-900/10' : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-violet-400'}`}>
+                        {uploading.type === 'lessonVideo' && uploading.index === i ? (
+                          <div className="flex items-center justify-center gap-2 text-violet-600">
+                            <Loader2 className="animate-spin" size={18} />
+                            <span className="text-xs font-bold">Yüklənir...</span>
+                          </div>
+                        ) : video.video_file_url ? (
+                          <div className="flex items-center justify-center gap-2 text-green-600 dark:text-green-400">
+                            <FileCheck size={18} />
+                            <span className="text-xs font-bold truncate">Video Yükləndi</span>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center gap-1 text-gray-400">
+                            <PlusCircle size={20} />
+                            <span className="text-xs font-bold">Video Upload et</span>
+                          </div>
+                        )}
+                        <input type="file" accept="video/*" className="hidden" onChange={(e) => handleFileUpload(e, 'lessonVideo', i)} />
+                      </div>
+                    </label>
+                  </div>
+
+                  {/* Lesson PDF Section */}
+                  <div>
+                    <label className="block text-[11px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-500 mb-2">Dərs Materialı (PDF)</label>
+                    <label className="cursor-pointer block">
+                      <div className={`border-2 border-dashed rounded-xl p-4 transition-all text-center ${video.pdf_url ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/10' : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-violet-400'}`}>
+                        {uploading.type === 'lessonPdf' && uploading.index === i ? (
+                          <div className="flex items-center justify-center gap-2 text-violet-600">
+                            <Loader2 className="animate-spin" size={18} />
+                            <span className="text-xs font-bold">Yüklənir...</span>
+                          </div>
+                        ) : video.pdf_url ? (
+                          <div className="flex items-center justify-center gap-2 text-amber-600 dark:text-amber-400">
+                            <FileCheck size={18} />
+                            <span className="text-xs font-bold truncate">PDF Əlavə Olundu</span>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center gap-1 text-gray-400">
+                            <PlusCircle size={20} />
+                            <span className="text-xs font-bold">PDF Materialı Əlavə et</span>
+                          </div>
+                        )}
+                        <input type="file" accept="application/pdf" className="hidden" onChange={(e) => handleFileUpload(e, 'lessonPdf', i)} />
+                      </div>
+                    </label>
+                  </div>
+                </div>
 
                 {/* YENİ: QUIZ BÖLMƏSİ */}
                 <div className="mt-4 border-t border-gray-200 dark:border-slate-700 pt-4">

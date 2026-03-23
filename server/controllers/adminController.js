@@ -42,7 +42,9 @@ const getAllCourses = async (req, res) => {
   try {
     const courses = await sql`
       SELECT c.*, 
-             u.first_name || ' ' || COALESCE(u.last_name, '') AS educator_name
+             u.first_name || ' ' || COALESCE(u.last_name, '') AS educator_name,
+             (SELECT COUNT(*) FROM course_videos cv WHERE cv.course_id = c.id AND cv.video_file_url IS NOT NULL AND cv.video_file_url != '') as video_file_count,
+             (SELECT COUNT(*) FROM course_videos cv WHERE cv.course_id = c.id AND cv.pdf_url IS NOT NULL AND cv.pdf_url != '') as video_pdf_count
       FROM courses c
       LEFT JOIN users u ON c.educator_id = u.id
       ORDER BY c.created_at DESC
