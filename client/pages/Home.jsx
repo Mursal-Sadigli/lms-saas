@@ -246,11 +246,11 @@ export default function Home() {
         )}
       </section>
 
-      {/* ── WHY LEARNHUB ── */}
+      {/* ── WHY ACE ACADEMY ── */}
       <section className="bg-violet-50 dark:bg-violet-950/20 py-14 sm:py-16 px-4 sm:px-6 transition-colors">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-10">
-            <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white">Niyə LearnHub? 💡</h2>
+            <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white">Niyə ACE Academy? 💡</h2>
             <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm">Sənin öyrənmə yolunda ən etibarlı tərəfdaş</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -390,10 +390,7 @@ export default function Home() {
             {/* Brand + Social */}
             <div>
               <div className="flex items-center gap-2.5 mb-4">
-                <div className="w-9 h-9 bg-violet-600 rounded-xl flex items-center justify-center shrink-0">
-                  <BookOpen size={18} className="text-white" />
-                </div>
-                <span className="font-bold text-xl">Learn<span className="text-violet-400">Hub</span></span>
+                <img src="/logo.jpg" alt="ACE Academy Logo" className="h-20 md:h-28 w-auto object-contain" />
               </div>
               <p className="text-gray-400 text-sm leading-relaxed mb-5">
                 Azərbaycanda keyfiyyətli online təhsil platforması. Peşəkar müəllimlərdən öyrən.
@@ -436,10 +433,10 @@ export default function Home() {
               <h4 className="font-bold text-white text-xs mb-5 uppercase tracking-widest">Dəstək</h4>
               <ul className="space-y-3 text-sm">
                 <li>
-                  <a href="mailto:support@learnhub.az"
+                  <a href="mailto:msadigli2025@gmail.com"
                     className="text-gray-400 hover:text-white transition-colors flex items-center gap-2">
                     <Mail size={13} className="shrink-0" />
-                    support@learnhub.az
+                    msadigli2025@gmail.com
                   </a>
                 </li>
                 <li>
@@ -467,7 +464,7 @@ export default function Home() {
 
           {/* Bottom */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-3 text-sm text-gray-500">
-            <p>© 2025 LearnHub. Bütün hüquqlar qorunur.</p>
+            <p>© 2025 ACE Academy. Bütün hüquqlar qorunur.</p>
             <p className="flex items-center gap-1.5">
               <span className="text-violet-400">♥</span> Azərbaycanda hazırlanıb
             </p>

@@ -20,7 +20,7 @@ export default function About() {
       {/* Hero */}
       <div className="bg-linear-to-br from-violet-600 to-purple-500 px-6 py-16 text-center">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-4xl font-extrabold text-white mb-4">LearnHub Haqqında 🎓</h1>
+          <h1 className="text-4xl font-extrabold text-white mb-4">ACE Academy Haqqında 🎓</h1>
           <p className="text-white/80 text-lg leading-relaxed">
             Biz Azərbaycanda onlayn texniki təhsili hamı üçün əlçatan etməyə çalışan
             bir komandayıq. Hər kurs real layihələr üzərindən qurulub.

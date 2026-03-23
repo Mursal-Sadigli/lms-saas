@@ -5,7 +5,7 @@ import { sendContactMessage } from '../src/api'
 const faqs = [
   { q: 'Kurslar nə qədər müddət ərzindədir?', a: 'Kurs aldıqdan sonra ömürlük giriş əldə edirsiniz. İstənilən vaxt, istənilən tərəfdən baxmaq olar.' },
   { q: 'Ödəniş üsulları hansılardır?', a: 'Visa, MasterCard, Kapital Bank kartları və digər ödəniş üsulları qəbul edilir.' },
-  { q: 'Kurs tamamlandıqdan sonra sertifikat verilirmi?', a: 'Bəli! Bütün kurslar tamamlandıqda rəsmi LearnHub sertifikatı təqdim olunur.' },
+  { q: 'Kurs tamamlandıqdan sonra sertifikat verilirmi?', a: 'Bəli! Bütün kurslar tamamlandıqda rəsmi ACE Academy sertifikatı təqdim olunur.' },
   { q: 'Müəllim olmaq üçün nə etməliyəm?', a: 'Qeydiyyatdan keçib educator rolunu seçin, sonra kurs yaradıb yayımlayın.' },
 ]
 

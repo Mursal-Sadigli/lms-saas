@@ -133,7 +133,7 @@ export default function CertificateView() {
               ID: {cert.id}
             </div>
             <div className="absolute top-2 right-2 md:bottom-6 md:right-12 md:top-auto text-[8px] md:text-xs text-slate-400 font-mono opacity-70">
-              learnhub.az/certificate/{cert.id.split('-').pop()}
+              aceacademy.az/certificate/{cert.id.split('-').pop()}
             </div>
           </div>
         </div>

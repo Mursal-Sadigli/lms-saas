@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { SignedIn, SignedOut, UserButton, useAuth } from '@clerk/clerk-react'
-import { BookOpen, Home, Info, Mail, BookMarked, Menu, X, Moon, Sun, Bell, Heart, Zap } from 'lucide-react'
+import { Home, Info, Mail, BookMarked, Menu, X, Moon, Sun, Bell, Heart, Zap } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useTheme } from '../src/context/ThemeContext'
 import { getWishlist, syncUserStreak } from '../src/api'
@@ -64,16 +64,11 @@ export default function Navbar() {
 
   return (
     <nav className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 sticky top-0 z-50 shadow-sm transition-colors duration-200">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-20 md:h-24 flex items-center justify-between">
 
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-9 h-9 bg-violet-600 rounded-xl flex items-center justify-center shrink-0">
-            <BookOpen size={20} className="text-white" />
-          </div>
-          <span className="font-bold text-xl text-gray-900 dark:text-white tracking-tight">
-            Learn<span className="text-violet-600 dark:text-violet-400">Hub</span>
-          </span>
+          <img src="/logo.jpg" alt="ACE Academy Logo" className="h-16 md:h-20 w-auto object-contain" />
         </Link>
 
         <div className="hidden md:flex items-center space-x-2">
